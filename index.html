@@ -5,221 +5,264 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>WOND — социальная сеть</title>
     <style>
-        /* ===== GLOBAL ===== */
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --primary: #4a76a8;
+            --primary-dark: #3b5f8a;
+            --secondary: #6c5ce7;
+            --gradient: linear-gradient(135deg, #4a76a8, #6c5ce7);
+            --gradient-hover: linear-gradient(135deg, #3b5f8a, #5a4bd1);
+            --bg: #e8edf3;
+            --card-bg: #ffffff;
+            --text-primary: #1a2634;
+            --text-secondary: #4a5c6e;
+            --text-muted: #7a8a9a;
+            --border: #e8ecf0;
+            --shadow: 0 8px 32px rgba(74, 118, 168, 0.12);
+            --shadow-hover: 0 12px 48px rgba(74, 118, 168, 0.20);
+            --radius: 20px;
+            --radius-sm: 14px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; }
-        body { background:#e8edf3; display:flex; justify-content:center; min-height:100vh; }
+        body { background:var(--bg); display:flex; justify-content:center; min-height:100vh; }
         
-        /* ===== APP CONTAINER ===== */
-        #app { width:100%; max-width:1100px; min-height:100vh; display:flex; background:#f5f7fa; border-radius:0; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,0.08); position:relative; }
+        /* ===== APP ===== */
+        #app { width:100%; max-width:1100px; min-height:100vh; display:flex; background:var(--card-bg); border-radius:0; overflow:hidden; box-shadow:var(--shadow); position:relative; }
         
         /* ===== SIDEBAR ===== */
         .sidebar {
-            width:240px; background:#ffffff; border-right:1px solid #e8ecf0; padding:24px 0; display:flex; flex-direction:column; flex-shrink:0;
+            width:260px; background:var(--card-bg); border-right:1px solid var(--border); padding:28px 0; display:flex; flex-direction:column; flex-shrink:0;
             position:sticky; top:0; height:100vh; overflow-y:auto;
         }
         .sidebar .logo {
-            padding:0 20px 24px 20px; border-bottom:2px solid #f0f2f5; margin-bottom:20px; display:flex; align-items:center; gap:12px;
+            padding:0 24px 28px 24px; border-bottom:2px solid var(--border); margin-bottom:24px; display:flex; align-items:center; gap:14px;
         }
         .sidebar .logo .icon {
-            width:44px; height:44px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; color:white; box-shadow:0 4px 12px rgba(74,118,168,0.3);
+            width:48px; height:48px; background:var(--gradient); border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; color:white; box-shadow:0 4px 16px rgba(74,118,168,0.35); transition:var(--transition);
         }
-        .sidebar .logo h1 { font-size:26px; font-weight:800; background:linear-gradient(135deg,#4a76a8,#6c5ce7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.5px; }
+        .sidebar .logo .icon:hover { transform:scale(1.05) rotate(-3deg); }
+        .sidebar .logo h1 { font-size:28px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.5px; }
+        .sidebar .logo .wond-dot { display:inline-block; width:8px; height:8px; background:var(--gradient); border-radius:50%; margin-left:2px; }
         
         .sidebar .user-card {
-            padding:0 20px 20px 20px; border-bottom:2px solid #f0f2f5; margin-bottom:16px; display:flex; align-items:center; gap:14px; cursor:pointer;
+            padding:0 20px 24px 20px; border-bottom:2px solid var(--border); margin-bottom:20px; display:flex; align-items:center; gap:16px; cursor:pointer; transition:var(--transition); border-radius:12px; margin:0 12px 16px 12px; padding:16px;
         }
-        .sidebar .user-card:hover { background:#f8fafc; }
+        .sidebar .user-card:hover { background:#f8fafc; transform:translateX(4px); }
         .sidebar .user-card .avatar {
-            width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#4a76a8,#6c5ce7); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:white; flex-shrink:0; object-fit:cover;
+            width:56px; height:56px; border-radius:50%; background:var(--gradient); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:white; flex-shrink:0; object-fit:cover; border:3px solid rgba(74,118,168,0.15); transition:var(--transition);
         }
+        .sidebar .user-card .avatar:hover { transform:scale(1.05); border-color:var(--primary); }
         .sidebar .user-card .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
         .sidebar .user-card .info { flex:1; min-width:0; }
-        .sidebar .user-card .info .name { font-weight:700; font-size:15px; color:#1a2634; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .sidebar .user-card .info .status { font-size:12px; color:#7a8a9a; }
+        .sidebar .user-card .info .name { font-weight:700; font-size:16px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .sidebar .user-card .info .status { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+        .sidebar .user-card .info .status .online { width:8px; height:8px; background:#00b894; border-radius:50%; display:inline-block; animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
         
         .sidebar .nav {
             flex:1; padding:0 12px;
         }
         .sidebar .nav button {
-            width:100%; padding:12px 16px; border:none; background:transparent; text-align:left; font-size:15px; font-weight:500; color:#4a5c6e; border-radius:12px; margin-bottom:4px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:all 0.2s;
+            width:100%; padding:14px 18px; border:none; background:transparent; text-align:left; font-size:15px; font-weight:500; color:var(--text-secondary); border-radius:14px; margin-bottom:4px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:var(--transition); position:relative;
         }
-        .sidebar .nav button:hover { background:#f0f4f8; }
-        .sidebar .nav button.active { background:#e8edf6; color:#4a76a8; font-weight:600; }
-        .sidebar .nav button .emoji { font-size:20px; width:28px; text-align:center; }
-        .sidebar .nav button .badge { margin-left:auto; background:#4a76a8; color:white; border-radius:50%; padding:2px 10px; font-size:12px; font-weight:600; }
+        .sidebar .nav button:hover { background:#f0f4f8; transform:translateX(4px); }
+        .sidebar .nav button.active { background:var(--gradient); color:white; box-shadow:0 4px 16px rgba(74,118,168,0.30); }
+        .sidebar .nav button.active .emoji { filter:brightness(10); }
+        .sidebar .nav button .emoji { font-size:20px; width:28px; text-align:center; transition:var(--transition); }
+        .sidebar .nav button .label { transition:var(--transition); }
+        .sidebar .nav button .badge { margin-left:auto; background:#e17055; color:white; border-radius:50%; padding:2px 10px; font-size:12px; font-weight:600; }
+        .sidebar .nav button.active .badge { background:rgba(255,255,255,0.25); }
         
         .sidebar .logout-btn {
-            margin:16px 20px 0 20px; padding:12px; border:1px solid #e8ecf0; background:white; border-radius:12px; color:#c0392b; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
+            margin:16px 20px 0 20px; padding:14px; border:2px solid var(--border); background:transparent; border-radius:14px; color:#e17055; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:10px;
         }
-        .sidebar .logout-btn:hover { background:#fef0ee; border-color:#e8b4b4; }
+        .sidebar .logout-btn:hover { background:#fef0ee; border-color:#e8b4b4; transform:translateY(-2px); box-shadow:0 4px 16px rgba(225,112,85,0.15); }
         
-        /* ===== MAIN CONTENT ===== */
-        .main { flex:1; padding:24px 28px; min-width:0; display:flex; flex-direction:column; }
+        /* ===== MAIN ===== */
+        .main { flex:1; padding:24px 28px; min-width:0; display:flex; flex-direction:column; background:var(--bg); }
         
-        /* ===== SEARCH BAR ===== */
+        /* ===== SEARCH ===== */
         .search-bar {
-            background:white; border-radius:18px; padding:12px 20px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04);
-            display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+            background:var(--card-bg); border-radius:var(--radius); padding:14px 20px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            display:flex; gap:12px; align-items:center; flex-wrap:wrap; border:1px solid var(--border); transition:var(--transition);
         }
+        .search-bar:focus-within { border-color:var(--primary); box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
         .search-bar input {
-            flex:1; padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; min-width:150px; transition:0.2s;
+            flex:1; padding:12px 18px; border:2px solid var(--border); border-radius:30px; font-size:14px; min-width:150px; transition:var(--transition); background:var(--bg);
         }
-        .search-bar input:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
+        .search-bar input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); background:white; }
         .search-bar select {
-            padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; background:white; cursor:pointer;
+            padding:12px 18px; border:2px solid var(--border); border-radius:30px; font-size:14px; background:var(--bg); cursor:pointer; transition:var(--transition);
         }
+        .search-bar select:focus { border-color:var(--primary); outline:none; }
         .search-bar button {
-            padding:10px 24px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s;
+            padding:12px 28px; background:var(--gradient); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition);
         }
-        .search-bar button:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.25); }
+        .search-bar button:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
         .search-results {
-            background:white; border-radius:18px; padding:16px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); display:none;
+            background:var(--card-bg); border-radius:var(--radius); padding:16px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); display:none; border:1px solid var(--border);
         }
         .search-results .result-item {
-            padding:10px 14px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:0.2s;
+            padding:12px 16px; border-radius:var(--radius-sm); display:flex; align-items:center; gap:14px; cursor:pointer; transition:var(--transition);
         }
-        .search-results .result-item:hover { background:#f0f4f8; }
+        .search-results .result-item:hover { background:#f0f4f8; transform:translateX(4px); }
         .search-results .result-item .avatar {
-            width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:14px; flex-shrink:0;
+            width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:16px; flex-shrink:0;
         }
         .search-results .result-item .info { flex:1; }
-        .search-results .result-item .info .name { font-weight:600; font-size:14px; color:#1a2634; }
-        .search-results .result-item .info .desc { font-size:12px; color:#7a8a9a; }
+        .search-results .result-item .info .name { font-weight:600; font-size:15px; color:var(--text-primary); }
+        .search-results .result-item .info .desc { font-size:13px; color:var(--text-muted); }
         
         /* ===== AUTH ===== */
-        #authPanel { display:flex; justify-content:center; align-items:center; min-height:100vh; width:100%; background:linear-gradient(135deg,#e8edf3,#d5dde8); }
-        .auth-box { background:white; padding:40px 36px; border-radius:24px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.10); }
-        .auth-box .logo-big { text-align:center; margin-bottom:28px; }
-        .auth-box .logo-big .icon { width:64px; height:64px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); border-radius:20px; display:inline-flex; align-items:center; justify-content:center; font-size:30px; color:white; font-weight:800; box-shadow:0 8px 24px rgba(74,118,168,0.3); }
-        .auth-box .logo-big h1 { font-size:32px; font-weight:800; background:linear-gradient(135deg,#4a76a8,#6c5ce7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-top:8px; }
-        .auth-box .logo-big p { color:#7a8a9a; font-size:14px; }
-        .auth-box input { width:100%; padding:14px 16px; border:2px solid #e8ecf0; border-radius:14px; margin-bottom:12px; font-size:15px; transition:0.2s; }
-        .auth-box input:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.10); }
-        .auth-box .btn-primary { width:100%; padding:14px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; margin-top:4px; }
-        .auth-box .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(74,118,168,0.30); }
-        .auth-box .btn-secondary { width:100%; padding:14px; background:transparent; color:#4a76a8; border:2px solid #e8ecf0; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; margin-top:8px; }
-        .auth-box .btn-secondary:hover { background:#f0f4f8; }
-        .auth-box .msg { text-align:center; margin-top:14px; font-size:14px; color:#c0392b; min-height:20px; }
+        #authPanel { display:flex; justify-content:center; align-items:center; min-height:100vh; width:100%; background:var(--gradient); position:relative; overflow:hidden; }
+        #authPanel::before { content:''; position:absolute; width:600px; height:600px; background:rgba(255,255,255,0.05); border-radius:50%; top:-200px; right:-200px; }
+        #authPanel::after { content:''; position:absolute; width:400px; height:400px; background:rgba(255,255,255,0.03); border-radius:50%; bottom:-100px; left:-100px; }
+        .auth-box { background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); padding:48px 40px; border-radius:var(--radius); max-width:420px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,0.20); position:relative; z-index:1; border:1px solid rgba(255,255,255,0.2); }
+        .auth-box .logo-big { text-align:center; margin-bottom:32px; }
+        .auth-box .logo-big .icon { width:72px; height:72px; background:var(--gradient); border-radius:20px; display:inline-flex; align-items:center; justify-content:center; font-size:34px; color:white; font-weight:800; box-shadow:0 8px 32px rgba(74,118,168,0.35); }
+        .auth-box .logo-big h1 { font-size:36px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-top:12px; }
+        .auth-box .logo-big p { color:var(--text-muted); font-size:15px; }
+        .auth-box input { width:100%; padding:16px 20px; border:2px solid var(--border); border-radius:var(--radius-sm); margin-bottom:14px; font-size:15px; transition:var(--transition); background:white; }
+        .auth-box input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.10); }
+        .auth-box .btn-primary { width:100%; padding:16px; background:var(--gradient); color:white; border:none; border-radius:var(--radius-sm); font-size:16px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .auth-box .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(74,118,168,0.35); }
+        .auth-box .btn-secondary { width:100%; padding:16px; background:transparent; color:var(--primary); border:2px solid var(--border); border-radius:var(--radius-sm); font-size:16px; font-weight:600; cursor:pointer; transition:var(--transition); margin-top:10px; }
+        .auth-box .btn-secondary:hover { background:#f0f4f8; border-color:var(--primary); }
+        .auth-box .msg { text-align:center; margin-top:16px; font-size:14px; color:#e17055; min-height:20px; }
         .hidden { display:none !important; }
         
         /* ===== WALL ===== */
-        .post-form { background:white; padding:20px; border-radius:18px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; }
-        .post-form textarea { width:100%; border:2px solid #e8ecf0; border-radius:14px; padding:14px; resize:vertical; font-size:15px; transition:0.2s; }
-        .post-form textarea:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
-        .post-form .actions { display:flex; justify-content:flex-end; margin-top:12px; gap:12px; }
-        .post-form .actions button { padding:10px 28px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s; }
-        .post-form .actions button:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.30); }
+        .post-form { background:var(--card-bg); padding:24px; border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; border:1px solid var(--border); transition:var(--transition); }
+        .post-form:focus-within { border-color:var(--primary); box-shadow:var(--shadow); }
+        .post-form textarea { width:100%; border:2px solid var(--border); border-radius:var(--radius-sm); padding:16px; resize:vertical; font-size:15px; transition:var(--transition); background:var(--bg); }
+        .post-form textarea:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); background:white; }
+        .post-form .actions { display:flex; justify-content:flex-end; margin-top:14px; gap:12px; }
+        .post-form .actions button { padding:12px 32px; background:var(--gradient); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .post-form .actions button:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
         
-        .post { background:white; padding:18px 20px; border-radius:18px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:16px; transition:0.2s; }
-        .post:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
-        .post .header { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
-        .post .header .avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:18px; flex-shrink:0; }
+        .post { background:var(--card-bg); padding:20px 24px; border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:16px; transition:var(--transition); border:1px solid var(--border); }
+        .post:hover { transform:translateY(-2px); box-shadow:var(--shadow-hover); }
+        .post .header { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+        .post .header .avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:18px; flex-shrink:0; cursor:pointer; transition:var(--transition); }
+        .post .header .avatar:hover { transform:scale(1.05); }
         .post .header .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
         .post .header .info { flex:1; }
-        .post .header .info .author { font-weight:700; color:#1a2634; font-size:15px; cursor:pointer; }
-        .post .header .info .author:hover { color:#4a76a8; }
-        .post .header .info .time { font-size:12px; color:#7a8a9a; margin-left:8px; }
-        .post .header .delete-btn { background:none; border:none; color:#b0c0d0; font-size:20px; cursor:pointer; padding:0 8px; transition:0.2s; }
-        .post .header .delete-btn:hover { color:#c0392b; transform:scale(1.1); }
-        .post .text { font-size:15px; line-height:1.6; color:#1a2634; word-wrap:break-word; }
-        .post .group-tag { display:inline-block; background:#e8edf6; color:#4a76a8; padding:2px 12px; border-radius:30px; font-size:12px; font-weight:600; margin-top:8px; }
+        .post .header .info .author { font-weight:700; color:var(--text-primary); font-size:15px; cursor:pointer; transition:var(--transition); }
+        .post .header .info .author:hover { color:var(--primary); }
+        .post .header .info .time { font-size:12px; color:var(--text-muted); margin-left:10px; }
+        .post .header .delete-btn { background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer; padding:0 8px; transition:var(--transition); }
+        .post .header .delete-btn:hover { color:#e17055; transform:scale(1.15); }
+        .post .text { font-size:15px; line-height:1.7; color:var(--text-primary); word-wrap:break-word; }
+        .post .group-tag { display:inline-block; background:var(--gradient); color:white; padding:4px 16px; border-radius:30px; font-size:12px; font-weight:600; margin-top:10px; }
         
         /* ===== PROFILE ===== */
         .profile-card {
-            background:white; border-radius:18px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px;
+            background:var(--card-bg); border-radius:var(--radius); padding:32px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; border:1px solid var(--border); transition:var(--transition);
         }
-        .profile-card .profile-header { display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
-        .profile-card .profile-avatar { width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:700; color:white; flex-shrink:0; }
+        .profile-card:hover { box-shadow:var(--shadow); }
+        .profile-card .profile-header { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+        .profile-card .profile-avatar { width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:48px; font-weight:700; color:white; flex-shrink:0; border:4px solid rgba(74,118,168,0.15); transition:var(--transition); cursor:pointer; }
+        .profile-card .profile-avatar:hover { transform:scale(1.02); border-color:var(--primary); }
         .profile-card .profile-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
         .profile-card .profile-info { flex:1; }
-        .profile-card .profile-info .name { font-size:28px; font-weight:800; color:#1a2634; }
-        .profile-card .profile-info .login { color:#7a8a9a; font-size:16px; }
-        .profile-card .profile-info .bio { margin-top:8px; color:#4a5c6e; }
-        .profile-card .profile-stats { display:flex; gap:30px; margin-top:16px; }
+        .profile-card .profile-info .name { font-size:30px; font-weight:800; color:var(--text-primary); }
+        .profile-card .profile-info .login { color:var(--text-muted); font-size:16px; }
+        .profile-card .profile-info .bio { margin-top:10px; color:var(--text-secondary); font-size:15px; }
+        .profile-card .profile-stats { display:flex; gap:40px; margin-top:18px; }
         .profile-card .profile-stats div { text-align:center; }
-        .profile-card .profile-stats .num { font-size:22px; font-weight:700; color:#1a2634; }
-        .profile-card .profile-stats .label { font-size:13px; color:#7a8a9a; }
+        .profile-card .profile-stats .num { font-size:24px; font-weight:700; color:var(--text-primary); }
+        .profile-card .profile-stats .label { font-size:13px; color:var(--text-muted); }
         
         /* ===== GROUPS ===== */
-        .groups-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-top:16px; }
+        .groups-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-top:16px; }
         .group-card {
-            background:white; border-radius:18px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center; transition:0.2s; cursor:pointer;
+            background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center; transition:var(--transition); cursor:pointer; border:1px solid var(--border); position:relative;
         }
-        .group-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.08); }
-        .group-card .group-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:24px; color:white; font-weight:700; }
-        .group-card .group-name { font-weight:700; font-size:16px; color:#1a2634; }
-        .group-card .group-members { font-size:13px; color:#7a8a9a; margin-top:4px; }
-        .group-card .group-btn { margin-top:12px; padding:6px 20px; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s; }
-        .group-card .group-btn.join { background:#4a76a8; color:white; }
-        .group-card .group-btn.join:hover { background:#3b5f8a; }
-        .group-card .group-btn.leave { background:#e8ecf0; color:#4a5c6e; }
+        .group-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+        .group-card .group-icon { width:64px; height:64px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:28px; color:white; font-weight:700; transition:var(--transition); }
+        .group-card .group-icon:hover { transform:scale(1.05); }
+        .group-card .group-name { font-weight:700; font-size:17px; color:var(--text-primary); }
+        .group-card .group-members { font-size:13px; color:var(--text-muted); margin-top:6px; }
+        .group-card .group-btn { margin-top:14px; padding:8px 24px; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .group-card .group-btn.join { background:var(--gradient); color:white; }
+        .group-card .group-btn.join:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.30); }
+        .group-card .group-btn.leave { background:var(--border); color:var(--text-secondary); }
         .group-card .group-btn.leave:hover { background:#d5dde8; }
+        .group-card .group-delete { position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; font-size:16px; color:var(--text-muted); transition:var(--transition); }
+        .group-card .group-delete:hover { color:#e17055; transform:scale(1.1); }
         
-        .create-group-form { background:white; border-radius:18px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-        .create-group-form input { flex:1; padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; min-width:150px; }
-        .create-group-form input:focus { border-color:#4a76a8; outline:none; }
-        .create-group-form button { padding:10px 24px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; }
+        .create-group-form { background:var(--card-bg); border-radius:var(--radius); padding:20px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; border:1px solid var(--border); }
+        .create-group-form input { flex:1; padding:12px 18px; border:2px solid var(--border); border-radius:30px; font-size:14px; min-width:150px; transition:var(--transition); background:var(--bg); }
+        .create-group-form input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); background:white; }
+        .create-group-form button { padding:12px 28px; background:var(--gradient); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .create-group-form button:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
         
         /* ===== MESSENGER ===== */
-        .messenger-layout { display:flex; gap:20px; height:calc(100vh - 180px); min-height:400px; }
-        .user-list { width:220px; background:white; border-radius:18px; padding:12px; overflow-y:auto; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
-        .user-list .item { padding:12px 14px; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:12px; transition:0.2s; margin-bottom:4px; }
-        .user-list .item:hover { background:#f0f4f8; }
-        .user-list .item.active { background:#e8edf6; }
+        .messenger-layout { display:flex; gap:20px; height:calc(100vh - 180px); min-height:420px; }
+        .user-list { width:220px; background:var(--card-bg); border-radius:var(--radius); padding:12px; overflow-y:auto; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--border); }
+        .user-list .item { padding:12px 14px; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; gap:12px; transition:var(--transition); margin-bottom:4px; }
+        .user-list .item:hover { background:#f0f4f8; transform:translateX(4px); }
+        .user-list .item.active { background:var(--gradient); color:white; }
+        .user-list .item.active .name { color:white; }
         .user-list .item .avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:16px; flex-shrink:0; }
         .user-list .item .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
-        .user-list .item .name { flex:1; font-weight:500; font-size:14px; color:#1a2634; }
-        .user-list .item .badge { background:#c0392b; color:white; border-radius:50%; padding:0 10px; font-size:12px; font-weight:600; }
+        .user-list .item .name { flex:1; font-weight:500; font-size:14px; color:var(--text-primary); }
+        .user-list .item .badge { background:#e17055; color:white; border-radius:50%; padding:0 10px; font-size:12px; font-weight:600; }
+        .user-list .item.active .badge { background:rgba(255,255,255,0.25); }
         
-        .chat-area { flex:1; background:white; border-radius:18px; display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow:hidden; }
-        .chat-area .empty { display:flex; align-items:center; justify-content:center; height:100%; color:#7a8a9a; font-size:15px; flex-direction:column; gap:8px; }
-        .chat-area .empty .icon { font-size:48px; opacity:0.3; }
-        .chat-messages { flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
-        .chat-messages .msg { max-width:75%; padding:12px 18px; border-radius:18px; font-size:14px; line-height:1.5; word-wrap:break-word; }
-        .chat-messages .msg.out { align-self:flex-end; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border-bottom-right-radius:4px; }
-        .chat-messages .msg.in { align-self:flex-start; background:#f0f4f8; color:#1a2634; border-bottom-left-radius:4px; }
-        .chat-messages .msg .meta { font-size:11px; opacity:0.7; margin-top:4px; display:flex; gap:8px; align-items:center; }
-        .chat-input { display:flex; gap:12px; padding:16px 20px; border-top:1px solid #e8ecf0; background:#fafcfe; }
-        .chat-input input { flex:1; padding:12px 18px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; transition:0.2s; }
-        .chat-input input:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
-        .chat-input button { padding:12px 28px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s; }
-        .chat-input button:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.25); }
+        .chat-area { flex:1; background:var(--card-bg); border-radius:var(--radius); display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow:hidden; border:1px solid var(--border); }
+        .chat-area .empty { display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted); font-size:15px; flex-direction:column; gap:10px; }
+        .chat-area .empty .icon { font-size:56px; opacity:0.2; }
+        .chat-messages { flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:var(--bg); }
+        .chat-messages .msg { max-width:75%; padding:14px 20px; border-radius:18px; font-size:14px; line-height:1.6; word-wrap:break-word; animation:slideIn 0.2s ease; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .chat-messages .msg.out { align-self:flex-end; background:var(--gradient); color:white; border-bottom-right-radius:4px; }
+        .chat-messages .msg.in { align-self:flex-start; background:var(--card-bg); color:var(--text-primary); border-bottom-left-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .chat-messages .msg .meta { font-size:11px; opacity:0.7; margin-top:6px; display:flex; gap:8px; align-items:center; }
+        .chat-input { display:flex; gap:12px; padding:16px 20px; border-top:1px solid var(--border); background:var(--card-bg); }
+        .chat-input input { flex:1; padding:12px 20px; border:2px solid var(--border); border-radius:30px; font-size:14px; transition:var(--transition); background:var(--bg); }
+        .chat-input input:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); background:white; }
+        .chat-input button { padding:12px 28px; background:var(--gradient); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .chat-input button:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
         
         /* ===== FOOTER ===== */
         .footer {
-            margin-top:32px; padding:16px 0; text-align:center; border-top:1px solid #e8ecf0; color:#7a8a9a; font-size:14px; letter-spacing:1px;
+            margin-top:32px; padding:20px 0; text-align:center; border-top:1px solid var(--border); color:var(--text-muted); font-size:14px; letter-spacing:0.5px;
         }
-        .footer .ceo { font-weight:700; color:#4a76a8; }
+        .footer .ceo { font-weight:700; color:var(--primary); background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
         
         /* ===== RESPONSIVE ===== */
         @media (max-width:768px) {
-            .sidebar { width:70px; padding:16px 0; }
+            .sidebar { width:72px; padding:16px 0; }
             .sidebar .logo h1, .sidebar .logo .icon { display:none; }
             .sidebar .logo { padding:0 12px 16px 12px; justify-content:center; }
             .sidebar .logo .icon { display:flex; width:40px; height:40px; font-size:18px; }
             .sidebar .user-card .info { display:none; }
-            .sidebar .user-card { padding:0 12px 16px 12px; justify-content:center; }
-            .sidebar .user-card .avatar { width:44px; height:44px; font-size:18px; }
+            .sidebar .user-card { padding:8px; justify-content:center; margin:0 6px 12px 6px; }
+            .sidebar .user-card .avatar { width:40px; height:40px; font-size:16px; }
             .sidebar .nav button { padding:12px; justify-content:center; }
             .sidebar .nav button .label { display:none; }
-            .sidebar .nav button .emoji { font-size:22px; width:auto; }
-            .sidebar .nav button .badge { position:absolute; margin-top:-8px; margin-left:20px; font-size:10px; padding:1px 8px; }
-            .sidebar .logout-btn { padding:12px; margin:12px; }
+            .sidebar .nav button .emoji { font-size:20px; width:auto; }
+            .sidebar .nav button .badge { position:absolute; margin-top:-8px; margin-left:18px; font-size:10px; padding:1px 8px; }
+            .sidebar .logout-btn { padding:10px; margin:8px; }
             .sidebar .logout-btn span { display:none; }
-            .main { padding:16px; }
+            .main { padding:14px; }
             .messenger-layout { flex-direction:column; height:auto; }
-            .user-list { width:100%; max-height:180px; }
+            .user-list { width:100%; max-height:160px; }
             .search-bar { flex-direction:column; }
             .search-bar input { width:100%; }
             .search-bar select { width:100%; }
             .profile-card .profile-header { flex-direction:column; text-align:center; }
             .profile-card .profile-stats { justify-content:center; }
+            .groups-grid { grid-template-columns:1fr 1fr; }
         }
         
         ::-webkit-scrollbar { width:6px; }
-        ::-webkit-scrollbar-track { background:#f0f2f5; }
+        ::-webkit-scrollbar-track { background:var(--bg); }
         ::-webkit-scrollbar-thumb { background:#c8d0da; border-radius:10px; }
-        ::-webkit-scrollbar-thumb:hover { background:#b0c0d0; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--primary); }
     </style>
 </head>
 <body>
@@ -229,13 +272,13 @@
     <div class="sidebar" id="sidebar" style="display:none;">
         <div class="logo">
             <div class="icon">W</div>
-            <h1>WOND</h1>
+            <h1>WOND<span class="wond-dot"></span></h1>
         </div>
         <div class="user-card" id="userCard">
             <div class="avatar" id="sidebarAvatar">?</div>
             <div class="info">
                 <div class="name" id="sidebarName">User</div>
-                <div class="status">Онлайн</div>
+                <div class="status"><span class="online"></span> Онлайн</div>
             </div>
         </div>
         <div class="nav">
@@ -249,46 +292,46 @@
     
     <!-- MAIN -->
     <div class="main" id="mainContent" style="display:none;">
-        <!-- SEARCH BAR -->
+        <!-- SEARCH -->
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Поиск людей, групп..." />
+            <input type="text" id="searchInput" placeholder="🔍 Поиск людей, групп..." />
             <select id="searchType">
                 <option value="all">Все</option>
                 <option value="users">Люди</option>
                 <option value="groups">Группы</option>
             </select>
-            <button id="searchBtn">🔍 Найти</button>
+            <button id="searchBtn">Найти</button>
         </div>
         <div class="search-results" id="searchResults"></div>
         
-        <!-- Wall Panel -->
+        <!-- Wall -->
         <div id="wallPanel">
             <div class="post-form">
                 <textarea id="postInput" rows="2" placeholder="Что у вас нового, друг?"></textarea>
                 <div class="actions">
-                    <button id="postBtn">Опубликовать</button>
+                    <button id="postBtn">📤 Опубликовать</button>
                 </div>
             </div>
             <div id="wallFeed"></div>
         </div>
         
-        <!-- Profile Panel -->
+        <!-- Profile -->
         <div id="profilePanel" style="display:none;">
             <div class="profile-card" id="profileCard"></div>
             <div id="profilePosts"></div>
         </div>
         
-        <!-- Groups Panel -->
+        <!-- Groups -->
         <div id="groupsPanel" style="display:none;">
             <div class="create-group-form">
                 <input type="text" id="groupNameInput" placeholder="Название группы..." />
                 <input type="text" id="groupDescInput" placeholder="Описание..." />
-                <button id="createGroupBtn">➕ Создать группу</button>
+                <button id="createGroupBtn">➕ Создать</button>
             </div>
             <div id="groupsList" class="groups-grid"></div>
         </div>
         
-        <!-- Messages Panel -->
+        <!-- Messages -->
         <div id="messagesPanel" style="display:none;">
             <div class="messenger-layout">
                 <div class="user-list" id="userList"></div>
@@ -304,7 +347,7 @@
         
         <!-- FOOTER -->
         <div class="footer">
-            <span>© 2026 WOND — Социальная сеть</span> &nbsp;|&nbsp; <span class="ceo">CEO: LEV USKOV</span>
+            <span>© 2026 WOND</span> &nbsp;•&nbsp; <span class="ceo">CEO: LEV USKOV</span>
         </div>
     </div>
     
@@ -316,8 +359,8 @@
                 <h1>WOND</h1>
                 <p>социальная сеть нового поколения</p>
             </div>
-            <input type="text" id="loginInput" placeholder="Логин" />
-            <input type="password" id="passInput" placeholder="Пароль" />
+            <input type="text" id="loginInput" placeholder="👤 Логин" />
+            <input type="password" id="passInput" placeholder="🔒 Пароль" />
             <button class="btn-primary" id="loginBtn">Войти</button>
             <button class="btn-secondary" id="registerBtn">Создать аккаунт</button>
             <div class="msg" id="authMessage"></div>
@@ -488,7 +531,7 @@ async function loadGroups() {
 }
 
 // ============================================================
-//  АВТОРИЗАЦИЯ
+//  АВТОРИЗАЦИЯ + СОХРАНЕНИЕ СЕССИИ
 // ============================================================
 async function login(login, password) {
     await loadUsers();
@@ -496,6 +539,7 @@ async function login(login, password) {
     if (user) {
         currentUser = login;
         localStorage.setItem('wond_session', login);
+        localStorage.setItem('wond_user', JSON.stringify({ login }));
         showApp();
         return true;
     }
@@ -508,6 +552,7 @@ async function register(login, password) {
     await db.put('users', { login, password });
     currentUser = login;
     localStorage.setItem('wond_session', login);
+    localStorage.setItem('wond_user', JSON.stringify({ login }));
     showApp();
     return true;
 }
@@ -517,6 +562,7 @@ function logout() {
     selectedChatUser = null;
     viewingProfile = null;
     localStorage.removeItem('wond_session');
+    localStorage.removeItem('wond_user');
     document.getElementById('authPanel').style.display = 'flex';
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('mainContent').style.display = 'none';
@@ -531,7 +577,26 @@ function showApp() {
     loadWall();
     loadUserList();
     loadGroups();
-    switchTab('wall');
+    if (viewingProfile) {
+        switchTab('profile');
+    } else {
+        switchTab('wall');
+    }
+}
+
+// Восстановление сессии при загрузке
+async function restoreSession() {
+    const saved = localStorage.getItem('wond_session');
+    if (saved) {
+        await loadUsers();
+        const user = allUsers.find(u => u.login === saved);
+        if (user) {
+            currentUser = saved;
+            showApp();
+            return true;
+        }
+    }
+    return false;
 }
 
 // ============================================================
@@ -540,12 +605,11 @@ function showApp() {
 async function loadWall() {
     const feed = document.getElementById('wallFeed');
     let posts = await db.getAll('posts');
-    // если смотрим чей-то профиль
     if (viewingProfile) {
         posts = posts.filter(p => p.author === viewingProfile);
     }
     if (!posts.length) {
-        feed.innerHTML = '<div style="text-align:center;color:#7a8a9a;padding:40px;">Здесь пока пусто. Напишите первый пост!</div>';
+        feed.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:48px;font-size:16px;">✨ Здесь пока пусто. Напишите первый пост!</div>';
         return;
     }
     const sorted = posts.slice().reverse();
@@ -557,6 +621,7 @@ async function loadWall() {
         header.className = 'header';
         const avDiv = document.createElement('div');
         renderAvatar(p.author, 44, avDiv);
+        avDiv.onclick = () => { viewProfile(p.author); };
         header.appendChild(avDiv);
         const info = document.createElement('div');
         info.className = 'info';
@@ -608,6 +673,14 @@ document.getElementById('postBtn').addEventListener('click', async () => {
     loadWall();
 });
 
+// Enter для поста
+document.getElementById('postInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('postBtn').click();
+    }
+});
+
 // ============================================================
 //  ПРОФИЛЬ
 // ============================================================
@@ -621,7 +694,29 @@ async function viewProfile(login) {
     const card = document.getElementById('profileCard');
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'profile-avatar';
-    renderAvatar(login, 100, avatarDiv);
+    renderAvatar(login, 120, avatarDiv);
+    avatarDiv.onclick = () => {
+        if (login === currentUser) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const dataUrl = ev.target.result;
+                    await setAvatar(currentUser, dataUrl);
+                    renderAvatar(currentUser, 56, document.getElementById('sidebarAvatar'));
+                    viewProfile(currentUser);
+                    loadWall();
+                    loadUserList();
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+    };
     
     const posts = await db.getAll('posts');
     const userPosts = posts.filter(p => p.author === login);
@@ -632,21 +727,20 @@ async function viewProfile(login) {
             <div class="profile-info">
                 <div class="name">${login}</div>
                 <div class="login">@${login}</div>
-                <div class="bio">${user.bio || 'Пользователь WOND'}</div>
+                <div class="bio">${user.bio || '🌟 Пользователь WOND'}</div>
                 <div class="profile-stats">
                     <div><div class="num">${userPosts.length}</div><div class="label">Постов</div></div>
-                    <div><div class="num">0</div><div class="label">Друзей</div></div>
+                    <div><div class="num">${allUsers.length - 1}</div><div class="label">Пользователей</div></div>
                 </div>
             </div>
         </div>
     `;
     
-    document.getElementById('profilePosts').innerHTML = '<h3 style="margin:16px 0 12px;color:#1a2634;">📝 Записи пользователя</h3>';
+    document.getElementById('profilePosts').innerHTML = '<h3 style="margin:18px 0 14px;color:var(--text-primary);font-size:20px;">📝 Записи</h3>';
     const postsContainer = document.getElementById('profilePosts');
     const feed = document.createElement('div');
     feed.id = 'profileFeed';
     postsContainer.appendChild(feed);
-    // перезагружаем стену с фильтром
     const origView = viewingProfile;
     await loadWall();
     viewingProfile = origView;
@@ -659,7 +753,7 @@ async function renderGroups() {
     await loadGroups();
     const container = document.getElementById('groupsList');
     if (!allGroups.length) {
-        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#7a8a9a;padding:40px;">Групп пока нет. Создайте первую!</div>';
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:48px;">👥 Групп пока нет. Создайте первую!</div>';
         return;
     }
     container.innerHTML = '';
@@ -695,11 +789,11 @@ async function renderGroups() {
             };
         } else if (g.members && g.members.length >= 100) {
             btn.textContent = '🚫 Полно';
-            btn.style.background = '#e8ecf0';
-            btn.style.color = '#7a8a9a';
+            btn.style.background = 'var(--border)';
+            btn.style.color = 'var(--text-muted)';
             btn.disabled = true;
         } else {
-            btn.textContent = 'Вступить';
+            btn.textContent = '➕ Вступить';
             btn.className += ' join';
             btn.onclick = async (e) => {
                 e.stopPropagation();
@@ -714,8 +808,8 @@ async function renderGroups() {
         
         if (isCreator) {
             const delBtn = document.createElement('button');
+            delBtn.className = 'group-delete';
             delBtn.textContent = '🗑️';
-            delBtn.style.cssText = 'position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:#c0392b;';
             delBtn.onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm(`Удалить группу "${g.name}"?`)) {
@@ -723,7 +817,6 @@ async function renderGroups() {
                     renderGroups();
                 }
             };
-            card.style.position = 'relative';
             card.appendChild(delBtn);
         }
         
@@ -733,7 +826,6 @@ async function renderGroups() {
         card.appendChild(btn);
         
         card.onclick = () => {
-            // показываем посты группы
             viewGroupPosts(g.name);
         };
         
@@ -748,7 +840,7 @@ async function viewGroupPosts(groupName) {
     const posts = await db.getAll('posts');
     const groupPosts = posts.filter(p => p.group === groupName);
     if (!groupPosts.length) {
-        feed.innerHTML = `<div style="text-align:center;color:#7a8a9a;padding:40px;">В группе "${groupName}" пока нет постов</div>`;
+        feed.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:48px;">📌 В группе "${groupName}" пока нет постов</div>`;
         return;
     }
     const sorted = groupPosts.slice().reverse();
@@ -760,6 +852,7 @@ async function viewGroupPosts(groupName) {
         header.className = 'header';
         const avDiv = document.createElement('div');
         renderAvatar(p.author, 44, avDiv);
+        avDiv.onclick = () => { viewProfile(p.author); };
         header.appendChild(avDiv);
         const info = document.createElement('div');
         info.className = 'info';
@@ -830,7 +923,7 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     }
     
     if (!items.length) {
-        results.innerHTML = '<div style="padding:16px;text-align:center;color:#7a8a9a;">Ничего не найдено</div>';
+        results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">😕 Ничего не найдено</div>';
         results.style.display = 'block';
         return;
     }
@@ -840,7 +933,7 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
             const u = item.data;
             return `<div class="result-item" onclick="viewProfile('${u.login}')">
                 <div class="avatar" style="background:${getAvatarColor(u.login)}">${getInitials(u.login)}</div>
-                <div class="info"><div class="name">${u.login}</div><div class="desc">Пользователь</div></div>
+                <div class="info"><div class="name">${u.login}</div><div class="desc">👤 Пользователь</div></div>
             </div>`;
         } else {
             const g = item.data;
@@ -853,6 +946,11 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
     results.style.display = 'block';
 });
 
+// Enter для поиска
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('searchBtn').click();
+});
+
 // ============================================================
 //  МЕССЕНДЖЕР
 // ============================================================
@@ -861,7 +959,7 @@ async function loadUserList() {
     const list = document.getElementById('userList');
     const others = allUsers.filter(u => u.login !== currentUser);
     if (!others.length) {
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:#7a8a9a;font-size:14px;">Нет других пользователей</div>';
+        list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:14px;">👤 Нет других пользователей</div>';
         return;
     }
     list.innerHTML = '';
@@ -973,7 +1071,6 @@ document.querySelectorAll('.nav button').forEach(btn => {
     });
 });
 
-// клик по аватарке в сайдбаре -> профиль
 document.getElementById('userCard').addEventListener('click', () => {
     viewingProfile = currentUser;
     switchTab('profile');
@@ -987,7 +1084,7 @@ document.getElementById('loginBtn').onclick = async () => {
     const pass = document.getElementById('passInput').value.trim();
     if (!login || !pass) { document.getElementById('authMessage').textContent = 'Заполните оба поля'; return; }
     const ok = await login(login, pass);
-    document.getElementById('authMessage').textContent = ok ? '' : 'Неверный логин или пароль';
+    document.getElementById('authMessage').textContent = ok ? '' : '❌ Неверный логин или пароль';
 };
 
 document.getElementById('registerBtn').onclick = async () => {
@@ -995,7 +1092,7 @@ document.getElementById('registerBtn').onclick = async () => {
     const pass = document.getElementById('passInput').value.trim();
     if (!login || !pass) { document.getElementById('authMessage').textContent = 'Заполните оба поля'; return; }
     const ok = await register(login, pass);
-    document.getElementById('authMessage').textContent = ok ? 'Аккаунт создан!' : 'Пользователь уже существует';
+    document.getElementById('authMessage').textContent = ok ? '✅ Аккаунт создан!' : '❌ Пользователь уже существует';
 };
 
 document.getElementById('logoutBtn').onclick = logout;
@@ -1026,28 +1123,23 @@ document.getElementById('sidebarAvatar').addEventListener('click', async (e) => 
 });
 
 // ============================================================
-//  ИНИЦИАЛИЗАЦИЯ
+//  ИНИЦИАЛИЗАЦИЯ — ВОССТАНОВЛЕНИЕ СЕССИИ
 // ============================================================
 (async function init() {
-    const saved = localStorage.getItem('wond_session');
-    if (saved) {
-        const ok = await login(saved, '');
-        if (ok) {
-            currentUser = saved;
-            showApp();
-            return;
-        }
+    const restored = await restoreSession();
+    if (!restored) {
+        document.getElementById('authPanel').style.display = 'flex';
+        document.getElementById('sidebar').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'none';
     }
-    document.getElementById('authPanel').style.display = 'flex';
-    document.getElementById('sidebar').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'none';
 })();
 
-console.log('🌟 WOND — социальная сеть');
+console.log('🌟 WOND — социальная сеть нового поколения');
 console.log('👤 Кликни на аватарку для загрузки фото');
 console.log('👥 Создавай группы до 100 участников');
 console.log('🔍 Ищи людей и группы через поиск');
 console.log('👨‍💼 CEO: LEV USKOV');
+console.log('💾 Сессия сохраняется при перезагрузке!');
 </script>
 </body>
 </html>
