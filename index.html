@@ -28,7 +28,6 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; }
         body { background:var(--bg); display:flex; justify-content:center; min-height:100vh; }
         
-        /* ===== APP ===== */
         #app { width:100%; max-width:1100px; min-height:100vh; display:flex; background:var(--card-bg); border-radius:0; overflow:hidden; box-shadow:var(--shadow); position:relative; }
         
         /* ===== SIDEBAR ===== */
@@ -170,10 +169,30 @@
         .profile-card .profile-info .name { font-size:30px; font-weight:800; color:var(--text-primary); }
         .profile-card .profile-info .login { color:var(--text-muted); font-size:16px; }
         .profile-card .profile-info .bio { margin-top:10px; color:var(--text-secondary); font-size:15px; }
-        .profile-card .profile-stats { display:flex; gap:40px; margin-top:18px; }
-        .profile-card .profile-stats div { text-align:center; }
+        .profile-card .profile-stats { display:flex; gap:40px; margin-top:18px; flex-wrap:wrap; }
+        .profile-card .profile-stats div { text-align:center; cursor:pointer; transition:var(--transition); padding:8px 12px; border-radius:12px; }
+        .profile-card .profile-stats div:hover { background:#f0f4f8; }
         .profile-card .profile-stats .num { font-size:24px; font-weight:700; color:var(--text-primary); }
         .profile-card .profile-stats .label { font-size:13px; color:var(--text-muted); }
+        
+        .profile-actions { display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+        .profile-actions button { padding:10px 28px; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .profile-actions .friend-add { background:var(--gradient); color:white; }
+        .profile-actions .friend-add:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
+        .profile-actions .friend-remove { background:#e17055; color:white; }
+        .profile-actions .friend-remove:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(225,112,85,0.30); }
+        .profile-actions .friend-pending { background:var(--border); color:var(--text-muted); cursor:default; }
+        
+        /* ===== FRIENDS LIST ===== */
+        .friends-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-top:16px; }
+        .friend-card {
+            background:var(--card-bg); border-radius:var(--radius); padding:20px; text-align:center; border:1px solid var(--border); transition:var(--transition); cursor:pointer;
+        }
+        .friend-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+        .friend-card .avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:24px; }
+        .friend-card .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+        .friend-card .name { font-weight:600; font-size:15px; color:var(--text-primary); }
+        .friend-card .status { font-size:12px; color:var(--text-muted); margin-top:4px; }
         
         /* ===== GROUPS ===== */
         .groups-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-top:16px; }
@@ -227,11 +246,56 @@
         .chat-input button { padding:12px 28px; background:var(--gradient); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:var(--transition); }
         .chat-input button:hover { transform:scale(1.02); box-shadow:0 4px 20px rgba(74,118,168,0.30); }
         
+        /* ===== CALL UI ===== */
+        .call-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(20px);
+            display:none; justify-content:center; align-items:center; z-index:9999; flex-direction:column; gap:30px;
+        }
+        .call-overlay.active { display:flex; }
+        .call-overlay .call-container {
+            background:var(--card-bg); border-radius:var(--radius); padding:40px; max-width:500px; width:90%; text-align:center; position:relative;
+        }
+        .call-overlay .call-avatar {
+            width:100px; height:100px; border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:40px; color:white; font-weight:700;
+        }
+        .call-overlay .call-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+        .call-overlay .call-name { font-size:24px; font-weight:700; color:var(--text-primary); }
+        .call-overlay .call-status { color:var(--text-muted); margin-top:8px; font-size:16px; }
+        .call-overlay .call-actions { display:flex; gap:16px; justify-content:center; margin-top:24px; flex-wrap:wrap; }
+        .call-overlay .call-actions button {
+            width:60px; height:60px; border-radius:50%; border:none; font-size:28px; cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center;
+        }
+        .call-overlay .call-actions button:hover { transform:scale(1.1); }
+        .call-overlay .call-actions .call-end { background:#e17055; color:white; }
+        .call-overlay .call-actions .call-end:hover { background:#c0392b; }
+        .call-overlay .call-actions .call-accept { background:#00b894; color:white; }
+        .call-overlay .call-actions .call-accept:hover { background:#00a383; }
+        .call-overlay .call-actions .call-mute { background:var(--border); color:var(--text-secondary); }
+        .call-overlay .call-actions .call-mute.active { background:#fdcb6e; color:#2d3436; }
+        .call-overlay .call-actions .call-video { background:var(--border); color:var(--text-secondary); }
+        .call-overlay .call-actions .call-video.active { background:#4a76a8; color:white; }
+        
+        .call-overlay .call-video-container {
+            display:flex; gap:20px; justify-content:center; flex-wrap:wrap; width:100%; max-width:700px;
+        }
+        .call-overlay .call-video-container video {
+            width:100%; max-width:320px; border-radius:var(--radius-sm); background:#1a1a2e; transform:scaleX(-1);
+        }
+        .call-overlay .call-video-container .local-video { max-width:160px; position:absolute; bottom:100px; right:20px; border:3px solid var(--primary); }
+        
         /* ===== FOOTER ===== */
         .footer {
             margin-top:32px; padding:20px 0; text-align:center; border-top:1px solid var(--border); color:var(--text-muted); font-size:14px; letter-spacing:0.5px;
         }
         .footer .ceo { font-weight:700; color:var(--primary); background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .footer .stats { display:inline-block; background:var(--gradient); color:white; padding:2px 16px; border-radius:30px; font-size:13px; margin-left:12px; font-weight:600; -webkit-text-fill-color:white; }
+        
+        /* ===== CONNECTION STATUS ===== */
+        .connection-status {
+            position:fixed; bottom:20px; right:20px; padding:8px 16px; border-radius:30px; font-size:12px; font-weight:600; z-index:1000;
+        }
+        .connection-status.online { background:#00b894; color:white; }
+        .connection-status.offline { background:#e17055; color:white; }
         
         /* ===== RESPONSIVE ===== */
         @media (max-width:768px) {
@@ -257,6 +321,9 @@
             .profile-card .profile-header { flex-direction:column; text-align:center; }
             .profile-card .profile-stats { justify-content:center; }
             .groups-grid { grid-template-columns:1fr 1fr; }
+            .friends-grid { grid-template-columns:1fr 1fr; }
+            .call-overlay .call-video-container video { max-width:100%; }
+            .call-overlay .call-video-container .local-video { max-width:120px; bottom:80px; right:10px; }
         }
         
         ::-webkit-scrollbar { width:6px; }
@@ -284,6 +351,7 @@
         <div class="nav">
             <button class="active" data-tab="wall"><span class="emoji">📰</span><span class="label">Стена</span></button>
             <button data-tab="profile"><span class="emoji">👤</span><span class="label">Профиль</span></button>
+            <button data-tab="friends"><span class="emoji">🤝</span><span class="label">Друзья</span><span class="badge" id="friendRequestsBadge" style="display:none;">0</span></button>
             <button data-tab="groups"><span class="emoji">👥</span><span class="label">Группы</span></button>
             <button data-tab="messages"><span class="emoji">💬</span><span class="label">Сообщения</span><span class="badge" id="totalUnread" style="display:none;">0</span></button>
         </div>
@@ -321,6 +389,15 @@
             <div id="profilePosts"></div>
         </div>
         
+        <!-- Friends -->
+        <div id="friendsPanel" style="display:none;">
+            <div style="background:var(--card-bg);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;border:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <button id="showAllFriends" class="active" style="padding:10px 24px;border:none;border-radius:30px;background:var(--gradient);color:white;font-weight:600;cursor:pointer;transition:var(--transition);">👥 Все друзья</button>
+                <button id="showFriendRequests" style="padding:10px 24px;border:2px solid var(--border);border-radius:30px;background:transparent;color:var(--text-secondary);font-weight:600;cursor:pointer;transition:var(--transition);">📨 Заявки <span id="requestsCount" style="background:#e17055;color:white;border-radius:50%;padding:0 10px;font-size:12px;display:none;">0</span></button>
+            </div>
+            <div id="friendsList" class="friends-grid"></div>
+        </div>
+        
         <!-- Groups -->
         <div id="groupsPanel" style="display:none;">
             <div class="create-group-form">
@@ -340,6 +417,8 @@
                     <div class="chat-input">
                         <input type="text" id="chatInput" placeholder="Напишите сообщение..." />
                         <button id="sendMsgBtn">➤</button>
+                        <button id="audioCallBtn" style="background:var(--gradient);color:white;border:none;border-radius:30px;padding:12px 20px;font-size:18px;cursor:pointer;transition:var(--transition);">📞</button>
+                        <button id="videoCallBtn" style="background:var(--gradient);color:white;border:none;border-radius:30px;padding:12px 20px;font-size:18px;cursor:pointer;transition:var(--transition);">📹</button>
                     </div>
                 </div>
             </div>
@@ -348,6 +427,7 @@
         <!-- FOOTER -->
         <div class="footer">
             <span>© 2026 WOND</span> &nbsp;•&nbsp; <span class="ceo">CEO: LEV USKOV</span>
+            <span class="stats" id="userCountStats">👥 0</span>
         </div>
     </div>
     
@@ -366,21 +446,455 @@
             <div class="msg" id="authMessage"></div>
         </div>
     </div>
+    
+    <!-- CALL OVERLAY -->
+    <div class="call-overlay" id="callOverlay">
+        <div class="call-container" id="callContainer">
+            <div class="call-avatar" id="callAvatar">?</div>
+            <div class="call-name" id="callName">User</div>
+            <div class="call-status" id="callStatus">Звонок...</div>
+            <div class="call-actions" id="callActions">
+                <button class="call-end" id="callEndBtn">📞</button>
+            </div>
+        </div>
+        <div class="call-video-container" id="callVideoContainer" style="display:none;">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+        </div>
+    </div>
+    
+    <!-- CONNECTION STATUS -->
+    <div class="connection-status offline" id="connectionStatus">🔴 Offline</div>
 </div>
 
 <script>
 // ============================================================
-//  БАЗА ДАННЫХ (IndexedDB)
+//  WEBSOCKET + WEBRTC
+// ============================================================
+let ws = null;
+let peerConnection = null;
+let localStream = null;
+let remoteStream = null;
+let isCallActive = false;
+let callType = 'audio';
+let callIncoming = false;
+let callTimeout = null;
+let currentCallTarget = null;
+let wsConnected = false;
+
+// ============================================================
+//  ПОДКЛЮЧЕНИЕ К WEBSOCKET
+// ============================================================
+function connectWebSocket() {
+    // Для локальной разработки
+    const wsUrl = 'ws://localhost:3000';
+    // Для продакшена: wss://your-domain.com
+    
+    ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+        console.log('✅ WebSocket подключен');
+        wsConnected = true;
+        document.getElementById('connectionStatus').className = 'connection-status online';
+        document.getElementById('connectionStatus').textContent = '🟢 Online';
+        
+        // Отправляем логин
+        if (currentUser) {
+            ws.send(JSON.stringify({
+                type: 'login',
+                login: currentUser
+            }));
+        }
+    };
+    
+    ws.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        console.log('📨 Получено:', data);
+        
+        switch(data.type) {
+            case 'users':
+                // Обновляем список пользователей
+                break;
+                
+            case 'call_offer':
+                handleCallOffer(data);
+                break;
+                
+            case 'call_answer':
+                handleCallAnswer(data);
+                break;
+                
+            case 'ice_candidate':
+                handleIceCandidate(data);
+                break;
+                
+            case 'call_end':
+                handleCallEnd();
+                break;
+                
+            case 'call_reject':
+                handleCallReject();
+                break;
+                
+            case 'error':
+                alert(data.message);
+                endCall();
+                break;
+        }
+    };
+    
+    ws.onclose = () => {
+        console.log('❌ WebSocket отключен');
+        wsConnected = false;
+        document.getElementById('connectionStatus').className = 'connection-status offline';
+        document.getElementById('connectionStatus').textContent = '🔴 Offline';
+        setTimeout(connectWebSocket, 3000);
+    };
+    
+    ws.onerror = (error) => {
+        console.error('WebSocket ошибка:', error);
+    };
+}
+
+function sendWS(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+    } else {
+        console.warn('WebSocket не подключен');
+    }
+}
+
+// ============================================================
+//  WEBRTC
+// ============================================================
+const configuration = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+async function createPeerConnection() {
+    peerConnection = new RTCPeerConnection(configuration);
+    
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            sendWS({
+                type: 'ice_candidate',
+                candidate: event.candidate,
+                target: currentCallTarget
+            });
+        }
+    };
+    
+    peerConnection.ontrack = (event) => {
+        remoteStream = event.streams[0];
+        document.getElementById('remoteVideo').srcObject = remoteStream;
+        document.getElementById('remoteVideo').style.display = 'block';
+    };
+    
+    peerConnection.onconnectionstatechange = () => {
+        if (peerConnection.connectionState === 'connected') {
+            document.getElementById('callStatus').textContent = '📞 В разговоре';
+        } else if (peerConnection.connectionState === 'disconnected') {
+            endCall();
+        }
+    };
+    
+    return peerConnection;
+}
+
+async function startCall(target, type) {
+    if (!wsConnected) {
+        alert('Нет соединения с сервером');
+        return;
+    }
+    
+    callType = type;
+    currentCallTarget = target;
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: type === 'video'
+        });
+        localStream = stream;
+        
+        if (type === 'video') {
+            document.getElementById('localVideo').srcObject = stream;
+            document.getElementById('localVideo').style.display = 'block';
+        }
+        
+        const pc = await createPeerConnection();
+        localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+        });
+        
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+        sendWS({
+            type: 'call_offer',
+            target: target,
+            offer: offer,
+            callType: type
+        });
+        
+        showCallUI(type, target, false);
+        document.getElementById('callStatus').textContent = '⏳ Ожидание ответа...';
+        isCallActive = true;
+        
+        callTimeout = setTimeout(() => {
+            if (isCallActive) {
+                document.getElementById('callStatus').textContent = '❌ Нет ответа';
+                setTimeout(() => endCall(), 2000);
+            }
+        }, 15000);
+        
+    } catch (err) {
+        console.error('Ошибка доступа к медиа:', err);
+        alert('Нет доступа к микрофону/камере');
+        endCall();
+    }
+}
+
+async function handleCallOffer(data) {
+    callIncoming = true;
+    currentCallTarget = data.from;
+    callType = data.callType || 'audio';
+    
+    // Показываем входящий звонок
+    showCallUI(callType, data.from, true);
+    document.getElementById('callStatus').textContent = '📞 Входящий звонок...';
+    
+    // Сохраняем offer для ответа
+    window.pendingOffer = data.offer;
+}
+
+async function acceptCall() {
+    if (!window.pendingOffer) return;
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: callType === 'video'
+        });
+        localStream = stream;
+        
+        if (callType === 'video') {
+            document.getElementById('localVideo').srcObject = stream;
+            document.getElementById('localVideo').style.display = 'block';
+        }
+        
+        const pc = await createPeerConnection();
+        localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+        });
+        
+        await pc.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        sendWS({
+            type: 'call_answer',
+            target: currentCallTarget,
+            answer: answer
+        });
+        
+        document.getElementById('callActions').innerHTML = `
+            <button class="call-end" id="callEndBtn">❌</button>
+            <button class="call-mute" id="callMuteBtn">🔊</button>
+            ${callType === 'video' ? '<button class="call-video" id="callVideoToggleBtn">📹</button>' : ''}
+        `;
+        document.getElementById('callEndBtn').onclick = () => endCall();
+        document.getElementById('callMuteBtn').onclick = toggleMute;
+        if (callType === 'video') {
+            document.getElementById('callVideoToggleBtn').onclick = toggleVideo;
+        }
+        
+        document.getElementById('callStatus').textContent = '📞 Соединение...';
+        isCallActive = true;
+        callIncoming = false;
+        window.pendingOffer = null;
+        
+    } catch (err) {
+        console.error('Ошибка принятия звонка:', err);
+        endCall();
+    }
+}
+
+async function handleCallAnswer(data) {
+    try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        document.getElementById('callStatus').textContent = '📞 Соединение установлено';
+        if (callTimeout) {
+            clearTimeout(callTimeout);
+            callTimeout = null;
+        }
+        
+        document.getElementById('callActions').innerHTML = `
+            <button class="call-end" id="callEndBtn">❌</button>
+            <button class="call-mute" id="callMuteBtn">🔊</button>
+            ${callType === 'video' ? '<button class="call-video" id="callVideoToggleBtn">📹</button>' : ''}
+        `;
+        document.getElementById('callEndBtn').onclick = () => endCall();
+        document.getElementById('callMuteBtn').onclick = toggleMute;
+        if (callType === 'video') {
+            document.getElementById('callVideoToggleBtn').onclick = toggleVideo;
+        }
+        
+    } catch (err) {
+        console.error('Ошибка установки ответа:', err);
+    }
+}
+
+async function handleIceCandidate(data) {
+    try {
+        if (peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+    } catch (err) {
+        console.error('Ошибка добавления ICE кандидата:', err);
+    }
+}
+
+function handleCallEnd() {
+    endCall();
+}
+
+function handleCallReject() {
+    document.getElementById('callStatus').textContent = '❌ Звонок отклонён';
+    setTimeout(() => endCall(), 1500);
+}
+
+function endCall() {
+    isCallActive = false;
+    callIncoming = false;
+    
+    if (callTimeout) {
+        clearTimeout(callTimeout);
+        callTimeout = null;
+    }
+    
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+    
+    if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        remoteStream = null;
+    }
+    
+    document.getElementById('localVideo').srcObject = null;
+    document.getElementById('localVideo').style.display = 'none';
+    document.getElementById('remoteVideo').srcObject = null;
+    document.getElementById('remoteVideo').style.display = 'none';
+    document.getElementById('callVideoContainer').style.display = 'none';
+    document.getElementById('callContainer').style.display = 'block';
+    
+    // Отправляем сигнал о завершении
+    if (currentCallTarget) {
+        sendWS({
+            type: 'call_end',
+            target: currentCallTarget
+        });
+    }
+    
+    currentCallTarget = null;
+    window.pendingOffer = null;
+    
+    setTimeout(() => {
+        hideCallUI();
+    }, 500);
+}
+
+function toggleMute() {
+    if (!localStream) return;
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        const btn = document.getElementById('callMuteBtn');
+        btn.textContent = audioTrack.enabled ? '🔊' : '🔇';
+        btn.classList.toggle('active', !audioTrack.enabled);
+    }
+}
+
+function toggleVideo() {
+    if (!localStream) return;
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        const btn = document.getElementById('callVideoToggleBtn');
+        btn.textContent = videoTrack.enabled ? '📹' : '🚫';
+        btn.classList.toggle('active', !videoTrack.enabled);
+    }
+}
+
+// ============================================================
+//  UI ЗВОНКА
+// ============================================================
+function showCallUI(type, user, incoming) {
+    const overlay = document.getElementById('callOverlay');
+    overlay.classList.add('active');
+    
+    const container = document.getElementById('callContainer');
+    const videoContainer = document.getElementById('callVideoContainer');
+    const avatar = document.getElementById('callAvatar');
+    const name = document.getElementById('callName');
+    const status = document.getElementById('callStatus');
+    const actions = document.getElementById('callActions');
+    
+    renderAvatar(user, 100, avatar);
+    name.textContent = user;
+    
+    if (incoming) {
+        status.textContent = '📞 Входящий звонок...';
+        actions.innerHTML = `
+            <button class="call-accept" id="callAcceptBtn">📞</button>
+            <button class="call-end" id="callEndBtn">❌</button>
+        `;
+        document.getElementById('callAcceptBtn').onclick = () => acceptCall();
+        document.getElementById('callEndBtn').onclick = () => {
+            sendWS({
+                type: 'call_reject',
+                target: currentCallTarget
+            });
+            endCall();
+        };
+    }
+    
+    if (type === 'video') {
+        videoContainer.style.display = 'flex';
+        document.getElementById('localVideo').style.display = 'block';
+    } else {
+        videoContainer.style.display = 'none';
+    }
+}
+
+function hideCallUI() {
+    document.getElementById('callOverlay').classList.remove('active');
+    document.getElementById('callVideoContainer').style.display = 'none';
+}
+
+// ============================================================
+//  БАЗА ДАННЫХ (IndexedDB) - СОКРАЩЕННАЯ ВЕРСИЯ
 // ============================================================
 class WondDB {
     constructor() {
         this.db = null;
         this.ready = new Promise((resolve) => {
-            const req = indexedDB.open('WondDB', 2);
+            const req = indexedDB.open('WondDB', 4);
             req.onupgradeneeded = (e) => {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('users')) {
-                    db.createObjectStore('users', { keyPath: 'login' });
+                    const users = db.createObjectStore('users', { keyPath: 'login' });
+                    users.createIndex('friends', 'friends', { unique: false });
                 }
                 if (!db.objectStoreNames.contains('posts')) {
                     const posts = db.createObjectStore('posts', { keyPath: 'id', autoIncrement: true });
@@ -396,6 +910,11 @@ class WondDB {
                 if (!db.objectStoreNames.contains('groups')) {
                     const groups = db.createObjectStore('groups', { keyPath: 'id', autoIncrement: true });
                     groups.createIndex('name', 'name', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('friendRequests')) {
+                    const reqs = db.createObjectStore('friendRequests', { keyPath: 'id', autoIncrement: true });
+                    reqs.createIndex('to', 'to', { unique: false });
+                    reqs.createIndex('from', 'from', { unique: false });
                 }
             };
             req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
@@ -457,6 +976,7 @@ let selectedChatUser = null;
 let allUsers = [];
 let allGroups = [];
 let viewingProfile = null;
+let showRequests = false;
 
 // ============================================================
 //  АВАТАРКИ
@@ -531,7 +1051,82 @@ async function loadGroups() {
 }
 
 // ============================================================
-//  АВТОРИЗАЦИЯ + СОХРАНЕНИЕ СЕССИИ
+//  СИСТЕМА ДРУЗЕЙ (СОКРАЩЕННО)
+// ============================================================
+async function getFriendRequests(toUser) {
+    const all = await db.getAll('friendRequests', 'to', toUser);
+    return all.filter(r => r.status === 'pending');
+}
+
+async function sendFriendRequest(from, to) {
+    const existing = await db.getAll('friendRequests');
+    const found = existing.find(r => r.from === from && r.to === to && r.status === 'pending');
+    if (found) return false;
+    await db.put('friendRequests', { from, to, status: 'pending', created: new Date().toLocaleString() });
+    return true;
+}
+
+async function acceptFriendRequest(requestId) {
+    const req = await db.get('friendRequests', requestId);
+    if (!req) return false;
+    req.status = 'accepted';
+    await db.put('friendRequests', req);
+    
+    const user1 = await db.get('users', req.from);
+    const user2 = await db.get('users', req.to);
+    if (user1 && user2) {
+        if (!user1.friends) user1.friends = [];
+        if (!user2.friends) user2.friends = [];
+        if (!user1.friends.includes(req.to)) user1.friends.push(req.to);
+        if (!user2.friends.includes(req.from)) user2.friends.push(req.from);
+        await db.put('users', user1);
+        await db.put('users', user2);
+    }
+    return true;
+}
+
+async function rejectFriendRequest(requestId) {
+    await db.delete('friendRequests', requestId);
+    return true;
+}
+
+async function removeFriend(userLogin, friendLogin) {
+    const user = await db.get('users', userLogin);
+    const friend = await db.get('users', friendLogin);
+    if (user && user.friends) {
+        user.friends = user.friends.filter(f => f !== friendLogin);
+        await db.put('users', user);
+    }
+    if (friend && friend.friends) {
+        friend.friends = friend.friends.filter(f => f !== userLogin);
+        await db.put('users', friend);
+    }
+    const allReqs = await db.getAll('friendRequests');
+    for (const r of allReqs) {
+        if ((r.from === userLogin && r.to === friendLogin) || (r.from === friendLogin && r.to === userLogin)) {
+            await db.delete('friendRequests', r.id);
+        }
+    }
+    return true;
+}
+
+async function isFriend(userLogin, friendLogin) {
+    const user = await db.get('users', userLogin);
+    return user && user.friends && user.friends.includes(friendLogin);
+}
+
+async function getFriendsCount(login) {
+    const user = await db.get('users', login);
+    return user && user.friends ? user.friends.length : 0;
+}
+
+async function getFriendRequestsCount(login) {
+    const reqs = await getFriendRequests(login);
+    return reqs.length;
+}
+
+// ============================================================
+//  АВТОРИЗАЦИЯ
 // ============================================================
 async function login(login, password) {
     await loadUsers();
@@ -541,6 +1136,9 @@ async function login(login, password) {
         localStorage.setItem('wond_session', login);
         localStorage.setItem('wond_user', JSON.stringify({ login }));
         showApp();
+        if (wsConnected) {
+            sendWS({ type: 'login', login: currentUser });
+        }
         return true;
     }
     return false;
@@ -549,11 +1147,14 @@ async function login(login, password) {
 async function register(login, password) {
     await loadUsers();
     if (allUsers.find(u => u.login === login)) return false;
-    await db.put('users', { login, password });
+    await db.put('users', { login, password, friends: [] });
     currentUser = login;
     localStorage.setItem('wond_session', login);
     localStorage.setItem('wond_user', JSON.stringify({ login }));
     showApp();
+    if (wsConnected) {
+        sendWS({ type: 'login', login: currentUser });
+    }
     return true;
 }
 
@@ -566,6 +1167,10 @@ function logout() {
     document.getElementById('authPanel').style.display = 'flex';
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('mainContent').style.display = 'none';
+    if (wsConnected) {
+        sendWS({ type: 'logout', login: currentUser });
+    }
+    endCall();
 }
 
 function showApp() {
@@ -574,9 +1179,11 @@ function showApp() {
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('sidebarName').textContent = currentUser;
     renderAvatar(currentUser, 56, document.getElementById('sidebarAvatar'));
+    updateBadges();
     loadWall();
     loadUserList();
     loadGroups();
+    updateUserCount();
     if (viewingProfile) {
         switchTab('profile');
     } else {
@@ -584,7 +1191,6 @@ function showApp() {
     }
 }
 
-// Восстановление сессии при загрузке
 async function restoreSession() {
     const saved = localStorage.getItem('wond_session');
     if (saved) {
@@ -599,8 +1205,25 @@ async function restoreSession() {
     return false;
 }
 
+async function updateBadges() {
+    if (!currentUser) return;
+    const requests = await getFriendRequestsCount(currentUser);
+    const badge = document.getElementById('friendRequestsBadge');
+    if (requests > 0) {
+        badge.style.display = 'inline';
+        badge.textContent = requests;
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+async function updateUserCount() {
+    await loadUsers();
+    document.getElementById('userCountStats').textContent = `👥 ${allUsers.length}`;
+}
+
 // ============================================================
-//  СТЕНА
+//  СТЕНА (СОКРАЩЕННО)
 // ============================================================
 async function loadWall() {
     const feed = document.getElementById('wallFeed');
@@ -673,16 +1296,8 @@ document.getElementById('postBtn').addEventListener('click', async () => {
     loadWall();
 });
 
-// Enter для поста
-document.getElementById('postInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        document.getElementById('postBtn').click();
-    }
-});
-
 // ============================================================
-//  ПРОФИЛЬ
+//  ПРОФИЛЬ (СОКРАЩЕННО)
 // ============================================================
 async function viewProfile(login) {
     viewingProfile = login;
@@ -720,6 +1335,27 @@ async function viewProfile(login) {
     
     const posts = await db.getAll('posts');
     const userPosts = posts.filter(p => p.author === login);
+    const friendsCount = await getFriendsCount(login);
+    const isFriendWith = await isFriend(currentUser, login);
+    const requests = await getFriendRequests(currentUser);
+    const hasPending = requests.some(r => r.from === login);
+    
+    let actionsHtml = '';
+    if (login !== currentUser) {
+        if (isFriendWith) {
+            actionsHtml = `<div class="profile-actions">
+                <button class="friend-remove" onclick="removeFriendAction('${login}')">❌ Удалить из друзей</button>
+            </div>`;
+        } else if (hasPending) {
+            actionsHtml = `<div class="profile-actions">
+                <button class="friend-pending">⏳ Заявка отправлена</button>
+            </div>`;
+        } else {
+            actionsHtml = `<div class="profile-actions">
+                <button class="friend-add" onclick="addFriendAction('${login}')">➕ Добавить в друзья</button>
+            </div>`;
+        }
+    }
     
     card.innerHTML = `
         <div class="profile-header">
@@ -729,9 +1365,11 @@ async function viewProfile(login) {
                 <div class="login">@${login}</div>
                 <div class="bio">${user.bio || '🌟 Пользователь WOND'}</div>
                 <div class="profile-stats">
-                    <div><div class="num">${userPosts.length}</div><div class="label">Постов</div></div>
+                    <div onclick="viewProfile('${login}')"><div class="num">${userPosts.length}</div><div class="label">Постов</div></div>
+                    <div onclick="showFriendsList('${login}')"><div class="num">${friendsCount}</div><div class="label">Друзей</div></div>
                     <div><div class="num">${allUsers.length - 1}</div><div class="label">Пользователей</div></div>
                 </div>
+                ${actionsHtml}
             </div>
         </div>
     `;
@@ -746,8 +1384,127 @@ async function viewProfile(login) {
     viewingProfile = origView;
 }
 
+async function addFriendAction(login) {
+    await sendFriendRequest(currentUser, login);
+    viewProfile(login);
+    updateBadges();
+}
+
+async function removeFriendAction(login) {
+    if (confirm(`Удалить ${login} из друзей?`)) {
+        await removeFriend(currentUser, login);
+        viewProfile(login);
+        updateBadges();
+    }
+}
+
+async function showFriendsList(login) {
+    viewingProfile = login;
+    switchTab('friends');
+    await renderFriends(login);
+}
+
 // ============================================================
-//  ГРУППЫ
+//  ДРУЗЬЯ (СОКРАЩЕННО)
+// ============================================================
+document.getElementById('showAllFriends').addEventListener('click', async () => {
+    showRequests = false;
+    document.getElementById('showAllFriends').style.background = 'var(--gradient)';
+    document.getElementById('showAllFriends').style.color = 'white';
+    document.getElementById('showFriendRequests').style.background = 'transparent';
+    document.getElementById('showFriendRequests').style.color = 'var(--text-secondary)';
+    await renderFriends(currentUser);
+});
+
+document.getElementById('showFriendRequests').addEventListener('click', async () => {
+    showRequests = true;
+    document.getElementById('showFriendRequests').style.background = 'var(--gradient)';
+    document.getElementById('showFriendRequests').style.color = 'white';
+    document.getElementById('showAllFriends').style.background = 'transparent';
+    document.getElementById('showAllFriends').style.color = 'var(--text-secondary)';
+    await renderFriendRequests();
+});
+
+async function renderFriends(login) {
+    const container = document.getElementById('friendsList');
+    const user = await db.get('users', login);
+    if (!user || !user.friends || user.friends.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:48px;">🤝 У пользователя пока нет друзей</div>';
+        return;
+    }
+    container.innerHTML = '';
+    for (const fLogin of user.friends) {
+        const card = document.createElement('div');
+        card.className = 'friend-card';
+        card.onclick = () => viewProfile(fLogin);
+        const av = document.createElement('div');
+        av.className = 'avatar';
+        renderAvatar(fLogin, 64, av);
+        card.appendChild(av);
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = fLogin;
+        card.appendChild(name);
+        const status = document.createElement('div');
+        status.className = 'status';
+        status.textContent = '🤝 Друг';
+        card.appendChild(status);
+        container.appendChild(card);
+    }
+}
+
+async function renderFriendRequests() {
+    const container = document.getElementById('friendsList');
+    const requests = await getFriendRequests(currentUser);
+    if (requests.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:48px;">📨 Нет входящих заявок</div>';
+        return;
+    }
+    container.innerHTML = '';
+    for (const r of requests) {
+        const card = document.createElement('div');
+        card.className = 'friend-card';
+        const av = document.createElement('div');
+        av.className = 'avatar';
+        renderAvatar(r.from, 64, av);
+        card.appendChild(av);
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = r.from;
+        card.appendChild(name);
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;gap:8px;margin-top:10px;justify-content:center;';
+        const acceptBtn = document.createElement('button');
+        acceptBtn.textContent = '✅';
+        acceptBtn.style.cssText = 'padding:6px 16px;border:none;border-radius:30px;background:#00b894;color:white;cursor:pointer;font-weight:600;';
+        acceptBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await acceptFriendRequest(r.id);
+            await renderFriendRequests();
+            updateBadges();
+        };
+        const rejectBtn = document.createElement('button');
+        rejectBtn.textContent = '❌';
+        rejectBtn.style.cssText = 'padding:6px 16px;border:none;border-radius:30px;background:#e17055;color:white;cursor:pointer;font-weight:600;';
+        rejectBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await rejectFriendRequest(r.id);
+            await renderFriendRequests();
+            updateBadges();
+        };
+        actions.appendChild(acceptBtn);
+        actions.appendChild(rejectBtn);
+        card.appendChild(actions);
+        container.appendChild(card);
+    }
+    
+    const count = document.getElementById('requestsCount');
+    count.textContent = requests.length;
+    count.style.display = 'inline';
+}
+
+// ============================================================
+//  ГРУППЫ (СОКРАЩЕННО)
 // ============================================================
 async function renderGroups() {
     await loadGroups();
@@ -901,7 +1658,7 @@ document.getElementById('createGroupBtn').addEventListener('click', async () => 
 });
 
 // ============================================================
-//  ПОИСК
+//  ПОИСК (СОКРАЩЕННО)
 // ============================================================
 document.getElementById('searchBtn').addEventListener('click', async () => {
     const query = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -944,11 +1701,6 @@ document.getElementById('searchBtn').addEventListener('click', async () => {
         }
     }).join('');
     results.style.display = 'block';
-});
-
-// Enter для поиска
-document.getElementById('searchInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('searchBtn').click();
 });
 
 // ============================================================
@@ -1036,8 +1788,23 @@ document.getElementById('sendMsgBtn').addEventListener('click', async () => {
     loadUserList();
 });
 
-document.getElementById('chatInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('sendMsgBtn').click();
+// ============================================================
+//  ЗВОНКИ
+// ============================================================
+document.getElementById('audioCallBtn').addEventListener('click', () => {
+    if (!selectedChatUser) {
+        alert('Выберите собеседника для звонка');
+        return;
+    }
+    startCall(selectedChatUser, 'audio');
+});
+
+document.getElementById('videoCallBtn').addEventListener('click', () => {
+    if (!selectedChatUser) {
+        alert('Выберите собеседника для звонка');
+        return;
+    }
+    startCall(selectedChatUser, 'video');
 });
 
 // ============================================================
@@ -1047,6 +1814,7 @@ function switchTab(tab) {
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.getElementById('wallPanel').style.display = tab === 'wall' ? 'block' : 'none';
     document.getElementById('profilePanel').style.display = tab === 'profile' ? 'block' : 'none';
+    document.getElementById('friendsPanel').style.display = tab === 'friends' ? 'block' : 'none';
     document.getElementById('groupsPanel').style.display = tab === 'groups' ? 'block' : 'none';
     document.getElementById('messagesPanel').style.display = tab === 'messages' ? 'block' : 'none';
     
@@ -1058,6 +1826,13 @@ function switchTab(tab) {
         if (!viewingProfile) viewProfile(currentUser);
         else viewProfile(viewingProfile);
     }
+    if (tab === 'friends') {
+        if (showRequests) {
+            renderFriendRequests();
+        } else {
+            renderFriends(viewingProfile || currentUser);
+        }
+    }
     if (tab === 'groups') renderGroups();
     if (tab === 'messages') { loadUserList(); loadChat(); }
 }
@@ -1066,6 +1841,13 @@ document.querySelectorAll('.nav button').forEach(btn => {
     btn.addEventListener('click', () => {
         if (btn.dataset.tab === 'profile' && !viewingProfile) {
             viewingProfile = currentUser;
+        }
+        if (btn.dataset.tab === 'friends') {
+            showRequests = false;
+            document.getElementById('showAllFriends').style.background = 'var(--gradient)';
+            document.getElementById('showAllFriends').style.color = 'white';
+            document.getElementById('showFriendRequests').style.background = 'transparent';
+            document.getElementById('showFriendRequests').style.color = 'var(--text-secondary)';
         }
         switchTab(btn.dataset.tab);
     });
@@ -1123,9 +1905,12 @@ document.getElementById('sidebarAvatar').addEventListener('click', async (e) => 
 });
 
 // ============================================================
-//  ИНИЦИАЛИЗАЦИЯ — ВОССТАНОВЛЕНИЕ СЕССИИ
+//  ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 (async function init() {
+    // Подключаем WebSocket
+    connectWebSocket();
+    
     const restored = await restoreSession();
     if (!restored) {
         document.getElementById('authPanel').style.display = 'flex';
@@ -1136,10 +1921,13 @@ document.getElementById('sidebarAvatar').addEventListener('click', async (e) => 
 
 console.log('🌟 WOND — социальная сеть нового поколения');
 console.log('👤 Кликни на аватарку для загрузки фото');
+console.log('🤝 Система друзей/подписчиков работает!');
 console.log('👥 Создавай группы до 100 участников');
+console.log('📞 Реальные аудио- и видеозвонки через WebRTC + WebSocket!');
 console.log('🔍 Ищи людей и группы через поиск');
 console.log('👨‍💼 CEO: LEV USKOV');
 console.log('💾 Сессия сохраняется при перезагрузке!');
+console.log('🟢 Сервер запускай: node server.js');
 </script>
 </body>
 </html>
