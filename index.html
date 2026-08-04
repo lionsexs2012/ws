@@ -10,7 +10,7 @@
         body { background:#e8edf3; display:flex; justify-content:center; min-height:100vh; }
         
         /* ===== APP CONTAINER ===== */
-        #app { width:100%; max-width:1100px; min-height:100vh; display:flex; background:#f5f7fa; border-radius:0; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,0.08); }
+        #app { width:100%; max-width:1100px; min-height:100vh; display:flex; background:#f5f7fa; border-radius:0; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,0.08); position:relative; }
         
         /* ===== SIDEBAR ===== */
         .sidebar {
@@ -26,8 +26,9 @@
         .sidebar .logo h1 { font-size:26px; font-weight:800; background:linear-gradient(135deg,#4a76a8,#6c5ce7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.5px; }
         
         .sidebar .user-card {
-            padding:0 20px 20px 20px; border-bottom:2px solid #f0f2f5; margin-bottom:16px; display:flex; align-items:center; gap:14px;
+            padding:0 20px 20px 20px; border-bottom:2px solid #f0f2f5; margin-bottom:16px; display:flex; align-items:center; gap:14px; cursor:pointer;
         }
+        .sidebar .user-card:hover { background:#f8fafc; }
         .sidebar .user-card .avatar {
             width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#4a76a8,#6c5ce7); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:white; flex-shrink:0; object-fit:cover;
         }
@@ -53,7 +54,37 @@
         .sidebar .logout-btn:hover { background:#fef0ee; border-color:#e8b4b4; }
         
         /* ===== MAIN CONTENT ===== */
-        .main { flex:1; padding:24px 28px; min-width:0; }
+        .main { flex:1; padding:24px 28px; min-width:0; display:flex; flex-direction:column; }
+        
+        /* ===== SEARCH BAR ===== */
+        .search-bar {
+            background:white; border-radius:18px; padding:12px 20px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+        }
+        .search-bar input {
+            flex:1; padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; min-width:150px; transition:0.2s;
+        }
+        .search-bar input:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
+        .search-bar select {
+            padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; background:white; cursor:pointer;
+        }
+        .search-bar button {
+            padding:10px 24px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s;
+        }
+        .search-bar button:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.25); }
+        .search-results {
+            background:white; border-radius:18px; padding:16px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); display:none;
+        }
+        .search-results .result-item {
+            padding:10px 14px; border-radius:12px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:0.2s;
+        }
+        .search-results .result-item:hover { background:#f0f4f8; }
+        .search-results .result-item .avatar {
+            width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:14px; flex-shrink:0;
+        }
+        .search-results .result-item .info { flex:1; }
+        .search-results .result-item .info .name { font-weight:600; font-size:14px; color:#1a2634; }
+        .search-results .result-item .info .desc { font-size:12px; color:#7a8a9a; }
         
         /* ===== AUTH ===== */
         #authPanel { display:flex; justify-content:center; align-items:center; min-height:100vh; width:100%; background:linear-gradient(135deg,#e8edf3,#d5dde8); }
@@ -82,22 +113,60 @@
         .post { background:white; padding:18px 20px; border-radius:18px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:16px; transition:0.2s; }
         .post:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); }
         .post .header { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
-        .post .header .avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#4a76a8,#6c5ce7); display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:18px; flex-shrink:0; }
+        .post .header .avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:18px; flex-shrink:0; }
         .post .header .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
         .post .header .info { flex:1; }
-        .post .header .info .author { font-weight:700; color:#1a2634; font-size:15px; }
+        .post .header .info .author { font-weight:700; color:#1a2634; font-size:15px; cursor:pointer; }
+        .post .header .info .author:hover { color:#4a76a8; }
         .post .header .info .time { font-size:12px; color:#7a8a9a; margin-left:8px; }
         .post .header .delete-btn { background:none; border:none; color:#b0c0d0; font-size:20px; cursor:pointer; padding:0 8px; transition:0.2s; }
         .post .header .delete-btn:hover { color:#c0392b; transform:scale(1.1); }
         .post .text { font-size:15px; line-height:1.6; color:#1a2634; word-wrap:break-word; }
+        .post .group-tag { display:inline-block; background:#e8edf6; color:#4a76a8; padding:2px 12px; border-radius:30px; font-size:12px; font-weight:600; margin-top:8px; }
+        
+        /* ===== PROFILE ===== */
+        .profile-card {
+            background:white; border-radius:18px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px;
+        }
+        .profile-card .profile-header { display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+        .profile-card .profile-avatar { width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:700; color:white; flex-shrink:0; }
+        .profile-card .profile-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+        .profile-card .profile-info { flex:1; }
+        .profile-card .profile-info .name { font-size:28px; font-weight:800; color:#1a2634; }
+        .profile-card .profile-info .login { color:#7a8a9a; font-size:16px; }
+        .profile-card .profile-info .bio { margin-top:8px; color:#4a5c6e; }
+        .profile-card .profile-stats { display:flex; gap:30px; margin-top:16px; }
+        .profile-card .profile-stats div { text-align:center; }
+        .profile-card .profile-stats .num { font-size:22px; font-weight:700; color:#1a2634; }
+        .profile-card .profile-stats .label { font-size:13px; color:#7a8a9a; }
+        
+        /* ===== GROUPS ===== */
+        .groups-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-top:16px; }
+        .group-card {
+            background:white; border-radius:18px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); text-align:center; transition:0.2s; cursor:pointer;
+        }
+        .group-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+        .group-card .group-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:24px; color:white; font-weight:700; }
+        .group-card .group-name { font-weight:700; font-size:16px; color:#1a2634; }
+        .group-card .group-members { font-size:13px; color:#7a8a9a; margin-top:4px; }
+        .group-card .group-btn { margin-top:12px; padding:6px 20px; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s; }
+        .group-card .group-btn.join { background:#4a76a8; color:white; }
+        .group-card .group-btn.join:hover { background:#3b5f8a; }
+        .group-card .group-btn.leave { background:#e8ecf0; color:#4a5c6e; }
+        .group-card .group-btn.leave:hover { background:#d5dde8; }
+        
+        .create-group-form { background:white; border-radius:18px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+        .create-group-form input { flex:1; padding:10px 16px; border:2px solid #e8ecf0; border-radius:30px; font-size:14px; min-width:150px; }
+        .create-group-form input:focus { border-color:#4a76a8; outline:none; }
+        .create-group-form button { padding:10px 24px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; }
         
         /* ===== MESSENGER ===== */
-        .messenger-layout { display:flex; gap:20px; height:calc(100vh - 140px); min-height:400px; }
+        .messenger-layout { display:flex; gap:20px; height:calc(100vh - 180px); min-height:400px; }
         .user-list { width:220px; background:white; border-radius:18px; padding:12px; overflow-y:auto; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
         .user-list .item { padding:12px 14px; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:12px; transition:0.2s; margin-bottom:4px; }
         .user-list .item:hover { background:#f0f4f8; }
         .user-list .item.active { background:#e8edf6; }
-        .user-list .item .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#4a76a8,#6c5ce7); display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:16px; flex-shrink:0; }
+        .user-list .item .avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:16px; flex-shrink:0; }
         .user-list .item .avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
         .user-list .item .name { flex:1; font-weight:500; font-size:14px; color:#1a2634; }
         .user-list .item .badge { background:#c0392b; color:white; border-radius:50%; padding:0 10px; font-size:12px; font-weight:600; }
@@ -115,6 +184,12 @@
         .chat-input input:focus { border-color:#4a76a8; outline:none; box-shadow:0 0 0 4px rgba(74,118,168,0.08); }
         .chat-input button { padding:12px 28px; background:linear-gradient(135deg,#4a76a8,#6c5ce7); color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.2s; }
         .chat-input button:hover { transform:scale(1.02); box-shadow:0 4px 16px rgba(74,118,168,0.25); }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top:32px; padding:16px 0; text-align:center; border-top:1px solid #e8ecf0; color:#7a8a9a; font-size:14px; letter-spacing:1px;
+        }
+        .footer .ceo { font-weight:700; color:#4a76a8; }
         
         /* ===== RESPONSIVE ===== */
         @media (max-width:768px) {
@@ -134,9 +209,13 @@
             .main { padding:16px; }
             .messenger-layout { flex-direction:column; height:auto; }
             .user-list { width:100%; max-height:180px; }
+            .search-bar { flex-direction:column; }
+            .search-bar input { width:100%; }
+            .search-bar select { width:100%; }
+            .profile-card .profile-header { flex-direction:column; text-align:center; }
+            .profile-card .profile-stats { justify-content:center; }
         }
         
-        /* scrollbar */
         ::-webkit-scrollbar { width:6px; }
         ::-webkit-scrollbar-track { background:#f0f2f5; }
         ::-webkit-scrollbar-thumb { background:#c8d0da; border-radius:10px; }
@@ -161,6 +240,8 @@
         </div>
         <div class="nav">
             <button class="active" data-tab="wall"><span class="emoji">📰</span><span class="label">Стена</span></button>
+            <button data-tab="profile"><span class="emoji">👤</span><span class="label">Профиль</span></button>
+            <button data-tab="groups"><span class="emoji">👥</span><span class="label">Группы</span></button>
             <button data-tab="messages"><span class="emoji">💬</span><span class="label">Сообщения</span><span class="badge" id="totalUnread" style="display:none;">0</span></button>
         </div>
         <button class="logout-btn" id="logoutBtn">🚪 <span>Выйти</span></button>
@@ -168,6 +249,18 @@
     
     <!-- MAIN -->
     <div class="main" id="mainContent" style="display:none;">
+        <!-- SEARCH BAR -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Поиск людей, групп..." />
+            <select id="searchType">
+                <option value="all">Все</option>
+                <option value="users">Люди</option>
+                <option value="groups">Группы</option>
+            </select>
+            <button id="searchBtn">🔍 Найти</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+        
         <!-- Wall Panel -->
         <div id="wallPanel">
             <div class="post-form">
@@ -177,6 +270,22 @@
                 </div>
             </div>
             <div id="wallFeed"></div>
+        </div>
+        
+        <!-- Profile Panel -->
+        <div id="profilePanel" style="display:none;">
+            <div class="profile-card" id="profileCard"></div>
+            <div id="profilePosts"></div>
+        </div>
+        
+        <!-- Groups Panel -->
+        <div id="groupsPanel" style="display:none;">
+            <div class="create-group-form">
+                <input type="text" id="groupNameInput" placeholder="Название группы..." />
+                <input type="text" id="groupDescInput" placeholder="Описание..." />
+                <button id="createGroupBtn">➕ Создать группу</button>
+            </div>
+            <div id="groupsList" class="groups-grid"></div>
         </div>
         
         <!-- Messages Panel -->
@@ -191,6 +300,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="footer">
+            <span>© 2026 WOND — Социальная сеть</span> &nbsp;|&nbsp; <span class="ceo">CEO: LEV USKOV</span>
         </div>
     </div>
     
@@ -213,13 +327,13 @@
 
 <script>
 // ============================================================
-//  БАЗА ДАННЫХ (IndexedDB) — отдельная, надёжная, быстрая
+//  БАЗА ДАННЫХ (IndexedDB)
 // ============================================================
 class WondDB {
     constructor() {
         this.db = null;
         this.ready = new Promise((resolve) => {
-            const req = indexedDB.open('WondDB', 1);
+            const req = indexedDB.open('WondDB', 2);
             req.onupgradeneeded = (e) => {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('users')) {
@@ -236,9 +350,13 @@ class WondDB {
                 if (!db.objectStoreNames.contains('avatars')) {
                     db.createObjectStore('avatars', { keyPath: 'login' });
                 }
+                if (!db.objectStoreNames.contains('groups')) {
+                    const groups = db.createObjectStore('groups', { keyPath: 'id', autoIncrement: true });
+                    groups.createIndex('name', 'name', { unique: false });
+                }
             };
             req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-            req.onerror = () => { /* fallback */ resolve(); };
+            req.onerror = () => { resolve(); };
         });
     }
     
@@ -294,6 +412,8 @@ const db = new WondDB();
 let currentUser = null;
 let selectedChatUser = null;
 let allUsers = [];
+let allGroups = [];
+let viewingProfile = null;
 
 // ============================================================
 //  АВАТАРКИ
@@ -319,9 +439,6 @@ async function setAvatar(login, dataUrl) {
     await db.put('avatars', { login, dataUrl });
 }
 
-// ============================================================
-//  РЕНДЕР АВАТАРКИ
-// ============================================================
 function renderAvatar(login, size = 44, container = null) {
     const el = document.createElement('div');
     el.className = 'avatar';
@@ -338,7 +455,6 @@ function renderAvatar(login, size = 44, container = null) {
     el.style.borderRadius = '50%';
     el.textContent = getInitials(login);
     
-    // загружаем аватарку
     getAvatarUrl(login).then(url => {
         if (url) {
             const img = document.createElement('img');
@@ -361,10 +477,14 @@ function renderAvatar(login, size = 44, container = null) {
 }
 
 // ============================================================
-//  ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ
+//  ЗАГРУЗКА ДАННЫХ
 // ============================================================
 async function loadUsers() {
     allUsers = await db.getAll('users');
+}
+
+async function loadGroups() {
+    allGroups = await db.getAll('groups');
 }
 
 // ============================================================
@@ -375,6 +495,7 @@ async function login(login, password) {
     const user = allUsers.find(u => u.login === login && u.password === password);
     if (user) {
         currentUser = login;
+        localStorage.setItem('wond_session', login);
         showApp();
         return true;
     }
@@ -386,6 +507,7 @@ async function register(login, password) {
     if (allUsers.find(u => u.login === login)) return false;
     await db.put('users', { login, password });
     currentUser = login;
+    localStorage.setItem('wond_session', login);
     showApp();
     return true;
 }
@@ -393,6 +515,8 @@ async function register(login, password) {
 function logout() {
     currentUser = null;
     selectedChatUser = null;
+    viewingProfile = null;
+    localStorage.removeItem('wond_session');
     document.getElementById('authPanel').style.display = 'flex';
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('mainContent').style.display = 'none';
@@ -406,6 +530,7 @@ function showApp() {
     renderAvatar(currentUser, 56, document.getElementById('sidebarAvatar'));
     loadWall();
     loadUserList();
+    loadGroups();
     switchTab('wall');
 }
 
@@ -414,7 +539,11 @@ function showApp() {
 // ============================================================
 async function loadWall() {
     const feed = document.getElementById('wallFeed');
-    const posts = await db.getAll('posts');
+    let posts = await db.getAll('posts');
+    // если смотрим чей-то профиль
+    if (viewingProfile) {
+        posts = posts.filter(p => p.author === viewingProfile);
+    }
     if (!posts.length) {
         feed.innerHTML = '<div style="text-align:center;color:#7a8a9a;padding:40px;">Здесь пока пусто. Напишите первый пост!</div>';
         return;
@@ -431,9 +560,17 @@ async function loadWall() {
         header.appendChild(avDiv);
         const info = document.createElement('div');
         info.className = 'info';
-        info.innerHTML = `<div class="author">${p.author} <span class="time">${p.time}</span></div>`;
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'author';
+        authorSpan.textContent = p.author;
+        authorSpan.onclick = () => { viewProfile(p.author); };
+        info.appendChild(authorSpan);
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'time';
+        timeSpan.textContent = p.time;
+        info.appendChild(timeSpan);
         header.appendChild(info);
-        if (p.author === currentUser) {
+        if (p.author === currentUser && !viewingProfile) {
             const del = document.createElement('button');
             del.className = 'delete-btn';
             del.textContent = '✕';
@@ -448,6 +585,12 @@ async function loadWall() {
         text.className = 'text';
         text.textContent = p.text;
         div.appendChild(text);
+        if (p.group) {
+            const tag = document.createElement('div');
+            tag.className = 'group-tag';
+            tag.textContent = '📌 ' + p.group;
+            div.appendChild(tag);
+        }
         feed.appendChild(div);
     }
 }
@@ -458,10 +601,256 @@ document.getElementById('postBtn').addEventListener('click', async () => {
     await db.put('posts', {
         author: currentUser,
         text: text,
-        time: new Date().toLocaleString()
+        time: new Date().toLocaleString(),
+        group: null
     });
     document.getElementById('postInput').value = '';
     loadWall();
+});
+
+// ============================================================
+//  ПРОФИЛЬ
+// ============================================================
+async function viewProfile(login) {
+    viewingProfile = login;
+    switchTab('profile');
+    await loadUsers();
+    const user = allUsers.find(u => u.login === login);
+    if (!user) return;
+    
+    const card = document.getElementById('profileCard');
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'profile-avatar';
+    renderAvatar(login, 100, avatarDiv);
+    
+    const posts = await db.getAll('posts');
+    const userPosts = posts.filter(p => p.author === login);
+    
+    card.innerHTML = `
+        <div class="profile-header">
+            ${avatarDiv.outerHTML}
+            <div class="profile-info">
+                <div class="name">${login}</div>
+                <div class="login">@${login}</div>
+                <div class="bio">${user.bio || 'Пользователь WOND'}</div>
+                <div class="profile-stats">
+                    <div><div class="num">${userPosts.length}</div><div class="label">Постов</div></div>
+                    <div><div class="num">0</div><div class="label">Друзей</div></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('profilePosts').innerHTML = '<h3 style="margin:16px 0 12px;color:#1a2634;">📝 Записи пользователя</h3>';
+    const postsContainer = document.getElementById('profilePosts');
+    const feed = document.createElement('div');
+    feed.id = 'profileFeed';
+    postsContainer.appendChild(feed);
+    // перезагружаем стену с фильтром
+    const origView = viewingProfile;
+    await loadWall();
+    viewingProfile = origView;
+}
+
+// ============================================================
+//  ГРУППЫ
+// ============================================================
+async function renderGroups() {
+    await loadGroups();
+    const container = document.getElementById('groupsList');
+    if (!allGroups.length) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#7a8a9a;padding:40px;">Групп пока нет. Создайте первую!</div>';
+        return;
+    }
+    container.innerHTML = '';
+    for (const g of allGroups) {
+        const card = document.createElement('div');
+        card.className = 'group-card';
+        const isMember = g.members && g.members.includes(currentUser);
+        const isCreator = g.creator === currentUser;
+        
+        const icon = document.createElement('div');
+        icon.className = 'group-icon';
+        icon.style.background = getAvatarColor(g.name);
+        icon.textContent = g.name.charAt(0).toUpperCase();
+        
+        const name = document.createElement('div');
+        name.className = 'group-name';
+        name.textContent = g.name;
+        
+        const members = document.createElement('div');
+        members.className = 'group-members';
+        members.textContent = `👥 ${g.members ? g.members.length : 0} / 100 участников`;
+        
+        const btn = document.createElement('button');
+        btn.className = 'group-btn';
+        if (isMember) {
+            btn.textContent = 'Выйти';
+            btn.className += ' leave';
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                g.members = g.members.filter(m => m !== currentUser);
+                await db.put('groups', g);
+                renderGroups();
+            };
+        } else if (g.members && g.members.length >= 100) {
+            btn.textContent = '🚫 Полно';
+            btn.style.background = '#e8ecf0';
+            btn.style.color = '#7a8a9a';
+            btn.disabled = true;
+        } else {
+            btn.textContent = 'Вступить';
+            btn.className += ' join';
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                if (!g.members) g.members = [];
+                if (!g.members.includes(currentUser) && g.members.length < 100) {
+                    g.members.push(currentUser);
+                    await db.put('groups', g);
+                    renderGroups();
+                }
+            };
+        }
+        
+        if (isCreator) {
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑️';
+            delBtn.style.cssText = 'position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:#c0392b;';
+            delBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`Удалить группу "${g.name}"?`)) {
+                    await db.delete('groups', g.id);
+                    renderGroups();
+                }
+            };
+            card.style.position = 'relative';
+            card.appendChild(delBtn);
+        }
+        
+        card.appendChild(icon);
+        card.appendChild(name);
+        card.appendChild(members);
+        card.appendChild(btn);
+        
+        card.onclick = () => {
+            // показываем посты группы
+            viewGroupPosts(g.name);
+        };
+        
+        container.appendChild(card);
+    }
+}
+
+async function viewGroupPosts(groupName) {
+    viewingProfile = null;
+    switchTab('wall');
+    const feed = document.getElementById('wallFeed');
+    const posts = await db.getAll('posts');
+    const groupPosts = posts.filter(p => p.group === groupName);
+    if (!groupPosts.length) {
+        feed.innerHTML = `<div style="text-align:center;color:#7a8a9a;padding:40px;">В группе "${groupName}" пока нет постов</div>`;
+        return;
+    }
+    const sorted = groupPosts.slice().reverse();
+    feed.innerHTML = '';
+    for (const p of sorted) {
+        const div = document.createElement('div');
+        div.className = 'post';
+        const header = document.createElement('div');
+        header.className = 'header';
+        const avDiv = document.createElement('div');
+        renderAvatar(p.author, 44, avDiv);
+        header.appendChild(avDiv);
+        const info = document.createElement('div');
+        info.className = 'info';
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'author';
+        authorSpan.textContent = p.author;
+        authorSpan.onclick = () => { viewProfile(p.author); };
+        info.appendChild(authorSpan);
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'time';
+        timeSpan.textContent = p.time;
+        info.appendChild(timeSpan);
+        header.appendChild(info);
+        div.appendChild(header);
+        const text = document.createElement('div');
+        text.className = 'text';
+        text.textContent = p.text;
+        div.appendChild(text);
+        const tag = document.createElement('div');
+        tag.className = 'group-tag';
+        tag.textContent = '📌 ' + p.group;
+        div.appendChild(tag);
+        feed.appendChild(div);
+    }
+}
+
+document.getElementById('createGroupBtn').addEventListener('click', async () => {
+    const name = document.getElementById('groupNameInput').value.trim();
+    const desc = document.getElementById('groupDescInput').value.trim();
+    if (!name) { alert('Введите название группы'); return; }
+    await loadGroups();
+    if (allGroups.find(g => g.name.toLowerCase() === name.toLowerCase())) {
+        alert('Группа с таким названием уже существует');
+        return;
+    }
+    await db.put('groups', {
+        name: name,
+        description: desc || 'Новая группа',
+        creator: currentUser,
+        members: [currentUser],
+        created: new Date().toLocaleString()
+    });
+    document.getElementById('groupNameInput').value = '';
+    document.getElementById('groupDescInput').value = '';
+    renderGroups();
+});
+
+// ============================================================
+//  ПОИСК
+// ============================================================
+document.getElementById('searchBtn').addEventListener('click', async () => {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const type = document.getElementById('searchType').value;
+    const results = document.getElementById('searchResults');
+    if (!query) { results.style.display = 'none'; return; }
+    
+    await loadUsers();
+    await loadGroups();
+    let items = [];
+    
+    if (type === 'all' || type === 'users') {
+        const users = allUsers.filter(u => u.login.toLowerCase().includes(query) && u.login !== currentUser);
+        items.push(...users.map(u => ({ type: 'user', data: u })));
+    }
+    if (type === 'all' || type === 'groups') {
+        const groups = allGroups.filter(g => g.name.toLowerCase().includes(query));
+        items.push(...groups.map(g => ({ type: 'group', data: g })));
+    }
+    
+    if (!items.length) {
+        results.innerHTML = '<div style="padding:16px;text-align:center;color:#7a8a9a;">Ничего не найдено</div>';
+        results.style.display = 'block';
+        return;
+    }
+    
+    results.innerHTML = items.map(item => {
+        if (item.type === 'user') {
+            const u = item.data;
+            return `<div class="result-item" onclick="viewProfile('${u.login}')">
+                <div class="avatar" style="background:${getAvatarColor(u.login)}">${getInitials(u.login)}</div>
+                <div class="info"><div class="name">${u.login}</div><div class="desc">Пользователь</div></div>
+            </div>`;
+        } else {
+            const g = item.data;
+            return `<div class="result-item" onclick="viewGroupPosts('${g.name}')">
+                <div class="avatar" style="background:${getAvatarColor(g.name)}">${g.name.charAt(0).toUpperCase()}</div>
+                <div class="info"><div class="name">${g.name}</div><div class="desc">👥 ${g.members ? g.members.length : 0} участников</div></div>
+            </div>`;
+        }
+    }).join('');
+    results.style.display = 'block';
 });
 
 // ============================================================
@@ -487,7 +876,6 @@ async function loadUserList() {
         name.textContent = u.login;
         item.appendChild(name);
         
-        // unread
         const msgs = await db.getAll('messages', 'chatKey', [currentUser, u.login].sort().join('_'));
         const unread = msgs.filter(m => m.to === currentUser && !m.read).length;
         if (unread) {
@@ -515,7 +903,6 @@ async function loadChat() {
     const chatKey = [currentUser, selectedChatUser].sort().join('_');
     const msgs = await db.getAll('messages', 'chatKey', chatKey);
     
-    // помечаем прочитанными
     for (const m of msgs) {
         if (m.to === currentUser && !m.read) {
             m.read = true;
@@ -561,13 +948,35 @@ document.getElementById('chatInput').addEventListener('keydown', (e) => {
 function switchTab(tab) {
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.getElementById('wallPanel').style.display = tab === 'wall' ? 'block' : 'none';
+    document.getElementById('profilePanel').style.display = tab === 'profile' ? 'block' : 'none';
+    document.getElementById('groupsPanel').style.display = tab === 'groups' ? 'block' : 'none';
     document.getElementById('messagesPanel').style.display = tab === 'messages' ? 'block' : 'none';
-    if (tab === 'wall') loadWall();
+    
+    if (tab === 'wall') {
+        if (!viewingProfile) loadWall();
+        else loadWall();
+    }
+    if (tab === 'profile') {
+        if (!viewingProfile) viewProfile(currentUser);
+        else viewProfile(viewingProfile);
+    }
+    if (tab === 'groups') renderGroups();
     if (tab === 'messages') { loadUserList(); loadChat(); }
 }
 
 document.querySelectorAll('.nav button').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    btn.addEventListener('click', () => {
+        if (btn.dataset.tab === 'profile' && !viewingProfile) {
+            viewingProfile = currentUser;
+        }
+        switchTab(btn.dataset.tab);
+    });
+});
+
+// клик по аватарке в сайдбаре -> профиль
+document.getElementById('userCard').addEventListener('click', () => {
+    viewingProfile = currentUser;
+    switchTab('profile');
 });
 
 // ============================================================
@@ -592,39 +1001,10 @@ document.getElementById('registerBtn').onclick = async () => {
 document.getElementById('logoutBtn').onclick = logout;
 
 // ============================================================
-//  ЗАГРУЗКА ПРИ СТАРТЕ
+//  ЗАГРУЗКА АВАТАРКИ
 // ============================================================
-(async function init() {
-    // проверяем, есть ли сохранённая сессия
-    const saved = localStorage.getItem('wond_session');
-    if (saved) {
-        const ok = await login(saved, '');
-        if (ok) {
-            // пароль не проверяем, но пользователь уже залогинен
-            currentUser = saved;
-            showApp();
-            return;
-        }
-    }
-    // показываем авторизацию
-    document.getElementById('authPanel').style.display = 'flex';
-    document.getElementById('sidebar').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'none';
-})();
-
-// сохраняем сессию при логине
-const origLogin = login;
-login = async function(login, password) {
-    const ok = await origLogin.call(this, login, password);
-    if (ok) localStorage.setItem('wond_session', login);
-    return ok;
-};
-
-// ============================================================
-//  ЗАГРУЗКА АВАТАРКИ (drag & drop / клик)
-// ============================================================
-document.getElementById('sidebarAvatar').addEventListener('click', async () => {
-    // создаём input
+document.getElementById('sidebarAvatar').addEventListener('click', async (e) => {
+    e.stopPropagation();
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -638,14 +1018,36 @@ document.getElementById('sidebarAvatar').addEventListener('click', async () => {
             renderAvatar(currentUser, 56, document.getElementById('sidebarAvatar'));
             loadWall();
             loadUserList();
+            if (viewingProfile === currentUser) viewProfile(currentUser);
         };
         reader.readAsDataURL(file);
     };
     input.click();
 });
 
-console.log('🌟 WOND — социальная сеть с отдельной базой IndexedDB');
-console.log('📸 Кликни на аватарку в боковой панели, чтобы загрузить своё фото!');
+// ============================================================
+//  ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+(async function init() {
+    const saved = localStorage.getItem('wond_session');
+    if (saved) {
+        const ok = await login(saved, '');
+        if (ok) {
+            currentUser = saved;
+            showApp();
+            return;
+        }
+    }
+    document.getElementById('authPanel').style.display = 'flex';
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'none';
+})();
+
+console.log('🌟 WOND — социальная сеть');
+console.log('👤 Кликни на аватарку для загрузки фото');
+console.log('👥 Создавай группы до 100 участников');
+console.log('🔍 Ищи людей и группы через поиск');
+console.log('👨‍💼 CEO: LEV USKOV');
 </script>
 </body>
 </html>
