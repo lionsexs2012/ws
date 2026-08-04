@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyCircle (VK 1.0 clone)</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, sans-serif; }
+        body { background:#e5ebf0; display:flex; justify-content:center; padding:20px; }
+        #app { max-width:600px; width:100%; background:white; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.12); overflow:hidden; }
+
+        /* header */
+        .header { background:#4a76a8; color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; }
+        .header h1 { font-size:20px; font-weight:600; letter-spacing:0.5px; }
+        .header-actions button { background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 14px; border-radius:20px; margin-left:8px; cursor:pointer; font-weight:500; }
+        .header-actions button:hover { background:rgba(255,255,255,0.35); }
+
+        /* tabs */
+        .tabs { display:flex; background:#f0f4f8; border-bottom:1px solid #d0d9e2; }
+        .tabs button { flex:1; padding:12px; border:none; background:transparent; font-weight:600; color:#4a5c6e; cursor:pointer; border-bottom:3px solid transparent; }
+        .tabs button.active { color:#4a76a8; border-bottom-color:#4a76a8; background:white; }
+
+        /* panels */
+        .panel { display:none; padding:16px; }
+        .panel.active { display:block; }
+
+        /* wall */
+        .post-form { background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:20px; }
+        .post-form textarea { width:100%; border:1px solid #d0d9e2; border-radius:10px; padding:10px; resize:vertical; font-size:14px; }
+        .post-form button { margin-top:8px; background:#4a76a8; color:white; border:none; padding:8px 24px; border-radius:20px; cursor:pointer; font-weight:500; }
+        .post-form button:hover { background:#3b5f8a; }
+
+        .post { background:white; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:14px; }
+        .post .author { font-weight:700; color:#1a2634; }
+        .post .time { font-size:12px; color:#7a8a9a; margin-left:10px; }
+        .post .text { margin-top:8px; word-wrap:break-word; }
+        .post .delete-btn { float:right; background:none; border:none; color:#b0c0d0; cursor:pointer; font-size:18px; }
+        .post .delete-btn:hover { color:#c0392b; }
+
+        /* messenger */
+        .msg-user { padding:10px 14px; background:#f0f4f8; border-radius:30px; margin-bottom:8px; cursor:pointer; display:flex; justify-content:space-between; }
+        .msg-user.active { background:#4a76a8; color:white; }
+        .msg-user .badge { background:#c0392b; color:white; border-radius:50%; padding:0 10px; font-size:13px; }
+
+        .chat-box { border:1px solid #e2e8f0; border-radius:12px; padding:12px; height:200px; overflow-y:auto; margin:12px 0; background:#fafcfe; }
+        .chat-msg { margin-bottom:8px; }
+        .chat-msg strong { color:#2c3e50; }
+        .chat-msg .time { font-size:11px; color:#8899aa; margin-left:8px; }
+        .msg-input { display:flex; gap:8px; }
+        .msg-input input { flex:1; padding:10px; border:1px solid #d0d9e2; border-radius:30px; }
+        .msg-input button { background:#4a76a8; color:white; border:none; padding:8px 20px; border-radius:30px; cursor:pointer; }
+
+        /* auth */
+        .auth-box { background:#f8fafc; padding:20px; border-radius:16px; text-align:center; }
+        .auth-box input { width:100%; padding:10px; margin:6px 0; border:1px solid #d0d9e2; border-radius:30px; }
+        .auth-box button { background:#4a76a8; color:white; border:none; padding:10px 30px; border-radius:30px; margin:6px; cursor:pointer; font-weight:500; }
+        .auth-box button.secondary { background:#b0c0d0; }
+        .hidden { display:none; }
+
+        /* footer */
+        .footer { text-align:center; font-size:12px; color:#99aaba; padding:12px; border-top:1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>🌐 MyCircle</h1>
+        <div class="header-actions">
+            <span id="userDisplay" style="font-weight:300;margin-right:10px;"></span>
+            <button id="logoutBtn">Выйти</button>
+        </div>
+    </div>
+
+    <!-- Auth Panel (показывается, если нет юзера) -->
+    <div id="authPanel" class="panel active">
+        <div class="auth-box">
+            <h2>Добро пожаловать</h2>
+            <p style="color:#6a7a8a;margin:10px 0;">Войдите или создайте аккаунт</p>
+            <input type="text" id="loginInput" placeholder="Логин" />
+            <input type="password" id="passInput" placeholder="Пароль" />
+            <div>
+                <button id="loginBtn">Войти</button>
+                <button id="registerBtn" class="secondary">Регистрация</button>
+            </div>
+            <div id="authMessage" style="margin-top:12px;color:#c0392b;font-size:14px;"></div>
+        </div>
+    </div>
+
+    <!-- Main App (после авторизации) -->
+    <div id="mainApp" class="hidden">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="wall">📰 Стена</button>
+            <button class="tab-btn" data-tab="messages">💬 Сообщения</button>
+        </div>
+
+        <!-- Wall Panel -->
+        <div id="wallPanel" class="panel active">
+            <div class="post-form">
+                <textarea id="postInput" rows="2" placeholder="Что у вас нового?"></textarea>
+                <button id="postBtn">Опубликовать</button>
+            </div>
+            <div id="wallFeed"></div>
+        </div>
+
+        <!-- Messages Panel -->
+        <div id="messagesPanel" class="panel">
+            <div id="userList"></div>
+            <div id="chatContainer" style="display:none;">
+                <div class="chat-box" id="chatMessages"></div>
+                <div class="msg-input">
+                    <input type="text" id="chatInput" placeholder="Напишите сообщение..." />
+                    <button id="sendMsgBtn">Отправить</button>
+                </div>
+            </div>
+            <div id="noChatSelected" style="color:#8899aa;text-align:center;padding:30px;">Выберите собеседника</div>
+        </div>
+    </div>
+
+    <div class="footer">MyCircle — клон ВК 1.0 • данные в localStorage</div>
+</div>
+
+<script>
+    // ===================== ДАННЫЕ =====================
+    const DB = {
+        getUsers() {
+            return JSON.parse(localStorage.getItem('mc_users')) || {};
+        },
+        setUsers(users) {
+            localStorage.setItem('mc_users', JSON.stringify(users));
+        },
+        getPosts() {
+            return JSON.parse(localStorage.getItem('mc_posts')) || [];
+        },
+        setPosts(posts) {
+            localStorage.setItem('mc_posts', JSON.stringify(posts));
+        },
+        getMessages() {
+            return JSON.parse(localStorage.getItem('mc_messages')) || {};
+        },
+        setMessages(msgs) {
+            localStorage.setItem('mc_messages', JSON.stringify(msgs));
+        },
+        getCurrentUser() {
+            return localStorage.getItem('mc_current_user') || null;
+        },
+        setCurrentUser(login) {
+            if (login) localStorage.setItem('mc_current_user', login);
+            else localStorage.removeItem('mc_current_user');
+        }
+    };
+
+    // ===================== АВТОРИЗАЦИЯ =====================
+    let currentUser = DB.getCurrentUser();
+    let selectedChatUser = null;
+
+    function renderAuth() {
+        if (currentUser) {
+            document.getElementById('authPanel').classList.remove('active');
+            document.getElementById('authPanel').style.display = 'none';
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userDisplay').textContent = currentUser;
+            loadWall();
+            loadUserList();
+            if (selectedChatUser) loadChat(selectedChatUser);
+        } else {
+            document.getElementById('authPanel').classList.add('active');
+            document.getElementById('authPanel').style.display = 'block';
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        const login = document.getElementById('loginInput').value.trim();
+        const pass = document.getElementById('passInput').value.trim();
+        const users = DB.getUsers();
+        if (users[login] && users[login].password === pass) {
+            currentUser = login;
+            DB.setCurrentUser(login);
+            document.getElementById('authMessage').textContent = '';
+            renderAuth();
+        } else {
+            document.getElementById('authMessage').textContent = 'Неверный логин или пароль';
+        }
+    });
+
+    document.getElementById('registerBtn').addEventListener('click', () => {
+        const login = document.getElementById('loginInput').value.trim();
+        const pass = document.getElementById('passInput').value.trim();
+        if (!login || !pass) {
+            document.getElementById('authMessage').textContent = 'Заполните оба поля';
+            return;
+        }
+        const users = DB.getUsers();
+        if (users[login]) {
+            document.getElementById('authMessage').textContent = 'Пользователь уже существует';
+            return;
+        }
+        users[login] = { password: pass };
+        DB.setUsers(users);
+        // авто-вход
+        currentUser = login;
+        DB.setCurrentUser(login);
+        document.getElementById('authMessage').textContent = 'Аккаунт создан!';
+        renderAuth();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        currentUser = null;
+        DB.setCurrentUser(null);
+        selectedChatUser = null;
+        renderAuth();
+    });
+
+    // ===================== СТЕНА =====================
+    function loadWall() {
+        const feed = document.getElementById('wallFeed');
+        const posts = DB.getPosts();
+        if (!posts.length) {
+            feed.innerHTML = '<div style="text-align:center;color:#8899aa;padding:30px;">Пока нет записей. Будьте первым!</div>';
+            return;
+        }
+        feed.innerHTML = posts.slice().reverse().map((p, idx) => `
+            <div class="post">
+                <span class="author">${p.author}</span>
+                <span class="time">${p.time}</span>
+                ${p.author === currentUser ? `<button class="delete-btn" data-idx="${posts.length - 1 - idx}">✕</button>` : ''}
+                <div class="text">${p.text}</div>
+            </div>
+        `).join('');
+
+        // Удаление постов (только свои)
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.idx);
+                const posts = DB.getPosts();
+                if (posts[idx] && posts[idx].author === currentUser) {
+                    posts.splice(idx, 1);
+                    DB.setPosts(posts);
+                    loadWall();
+                }
+            });
+        });
+    }
+
+    document.getElementById('postBtn').addEventListener('click', () => {
+        const text = document.getElementById('postInput').value.trim();
+        if (!text) return;
+        const posts = DB.getPosts();
+        posts.push({
+            author: currentUser,
+            text: text,
+            time: new Date().toLocaleString()
+        });
+        DB.setPosts(posts);
+        document.getElementById('postInput').value = '';
+        loadWall();
+    });
+
+    // ===================== МЕССЕНДЖЕР =====================
+    function loadUserList() {
+        const users = DB.getUsers();
+        const list = document.getElementById('userList');
+        const current = currentUser;
+        const msgData = DB.getMessages();
+
+        list.innerHTML = Object.keys(users)
+            .filter(u => u !== current)
+            .map(u => {
+                const chatKey = [current, u].sort().join('_');
+                const unread = (msgData[chatKey] || []).filter(m => m.to === current && !m.read).length;
+                return `<div class="msg-user ${selectedChatUser === u ? 'active' : ''}" data-user="${u}">
+                    ${u} ${unread ? `<span class="badge">${unread}</span>` : ''}
+                </div>`;
+            }).join('');
+
+        document.querySelectorAll('.msg-user').forEach(el => {
+            el.addEventListener('click', function() {
+                selectedChatUser = this.dataset.user;
+                loadUserList(); // обновить активный класс
+                loadChat(selectedChatUser);
+                document.getElementById('chatContainer').style.display = 'block';
+                document.getElementById('noChatSelected').style.display = 'none';
+            });
+        });
+    }
+
+    function loadChat(otherUser) {
+        if (!otherUser) return;
+        const chatKey = [currentUser, otherUser].sort().join('_');
+        const msgData = DB.getMessages();
+        const messages = msgData[chatKey] || [];
+
+        // Пометить все входящие как прочитанные
+        let updated = messages.map(m => {
+            if (m.to === currentUser && !m.read) m.read = true;
+            return m;
+        });
+        msgData[chatKey] = updated;
+        DB.setMessages(msgData);
+
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = updated.map(m => `
+            <div class="chat-msg">
+                <strong>${m.from}</strong> <span class="time">${m.time}</span><br/>
+                ${m.text}
+            </div>
+        `).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    document.getElementById('sendMsgBtn').addEventListener('click', () => {
+        if (!selectedChatUser) return;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const chatKey = [currentUser, selectedChatUser].sort().join('_');
+        const msgData = DB.getMessages();
+        if (!msgData[chatKey]) msgData[chatKey] = [];
+        msgData[chatKey].push({
+            from: currentUser,
+            to: selectedChatUser,
+            text: text,
+            time: new Date().toLocaleString(),
+            read: false
+        });
+        DB.setMessages(msgData);
+        input.value = '';
+        loadChat(selectedChatUser);
+        loadUserList(); // обновить счетчик
+    });
+
+    // ===================== ВКЛАДКИ =====================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const tab = this.dataset.tab;
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            if (tab === 'wall') {
+                document.getElementById('wallPanel').classList.add('active');
+                loadWall();
+            } else {
+                document.getElementById('messagesPanel').classList.add('active');
+                loadUserList();
+                if (selectedChatUser) {
+                    loadChat(selectedChatUser);
+                    document.getElementById('chatContainer').style.display = 'block';
+                    document.getElementById('noChatSelected').style.display = 'none';
+                } else {
+                    document.getElementById('chatContainer').style.display = 'none';
+                    document.getElementById('noChatSelected').style.display = 'block';
+                }
+            }
+        });
+    });
+
+    // ===================== СТАРТ =====================
+    renderAuth();
+    if (currentUser) {
+        loadWall();
+        loadUserList();
+    }
+
+    // Enter для отправки сообщения
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('sendMsgBtn').click();
+    });
+    // Enter для поста
+    document.getElementById('postInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById('postBtn').click();
+        }
+    });
+</script>
+</body>
+</html>
