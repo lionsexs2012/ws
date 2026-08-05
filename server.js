@@ -18,6 +18,44 @@ const SALT_ROUNDS = 10;
 const users = new Map(); // email -> { id, login, email, passwordHash, friends, createdAt }
 const sessions = new Map(); // token -> { userId, login, expires }
 const wsClients = new Map(); // userId -> ws
+// Подтверждение email
+app.post('/api/verify-email', async (req, res) => {
+    const { code } = req.body;
+    const userId = req.userId;
+    const user = users.get(userId);
+    
+    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    
+    if (user.verificationCode === code) {
+        user.verified = true;
+        user.verificationCode = null;
+        users.set(userId, user);
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ error: 'Неверный код' });
+    }
+});
+
+// Отправка кода повторно
+app.post('/api/resend-verification', async (req, res) => {
+    const userId = req.userId;
+    const user = users.get(userId);
+    
+    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    
+    const code = generateVerificationCode();
+    user.verificationCode = code;
+    users.set(userId, user);
+    
+    // Отправка email (используй nodemailer)
+    // sendVerificationEmail(user.email, code);
+    
+    res.json({ success: true });
+});
+
+function generateVerificationCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 // ============================================================
 //  HTTP СЕРВЕР
