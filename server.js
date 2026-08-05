@@ -643,13 +643,15 @@ const PORT = process.env.PORT || 3000;
 
         console.log('✅ База данных готова');
 
-        // Добавляем тестового пользователя
+        // ============================================================
+        //  ТЕСТОВЫЙ ПОЛЬЗОВАТЕЛЬ — ИСПРАВЛЕНО!
+        // ============================================================
         const testHash = await bcrypt.hash('123456', 10);
         await pool.query(`
             INSERT INTO users (id, login, email, password_hash, verified)
-            VALUES ($1, $2, $3, $4, $5)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4)
             ON CONFLICT (id) DO NOTHING
-        `, ['test-user-1', 'test', 'test@wond.com', testHash, true]);
+        `, ['test', 'test@wond.com', testHash, true]);
 
         console.log('🧪 Тестовый пользователь: test / 123456');
 
