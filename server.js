@@ -647,13 +647,23 @@ const PORT = process.env.PORT || 3000;
         //  ТЕСТОВЫЙ ПОЛЬЗОВАТЕЛЬ — ИСПРАВЛЕНО!
         // ============================================================
         const testHash = await bcrypt.hash('123456', 10);
-        await pool.query(`
-            INSERT INTO users (id, login, email, password_hash, verified)
-            VALUES (gen_random_uuid(), $1, $2, $3, $4)
-            ON CONFLICT (id) DO NOTHING
-        `, ['test', 'test@wond.com', testHash, true]);
+        
+        // Проверяем, существует ли уже пользователь с логином 'test'
+        const userExists = await pool.query(
+            'SELECT id FROM users WHERE login = $1',
+            ['test']
+        );
 
-        console.log('🧪 Тестовый пользователь: test / 123456');
+        if (userExists.rows.length === 0) {
+            // Если пользователя нет — создаём
+            await pool.query(`
+                INSERT INTO users (id, login, email, password_hash, verified)
+                VALUES (gen_random_uuid(), $1, $2, $3, $4)
+            `, ['test', 'test@wond.com', testHash, true]);
+            console.log('🧪 Тестовый пользователь создан: test / 123456');
+        } else {
+            console.log('ℹ️ Тестовый пользователь уже существует');
+        }
 
     } catch (err) {
         console.error('❌ Ошибка БД:', err);
