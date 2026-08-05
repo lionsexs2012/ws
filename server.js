@@ -125,7 +125,8 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/verify', async (req, res) => {
     try {
         const { code } = req.body;
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         if (!token) return res.status(401).json({ error: 'Нет токена' });
 
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -153,7 +154,8 @@ app.post('/api/verify', async (req, res) => {
 
 app.get('/api/verify-token', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         if (!token) return res.status(401).json({ error: 'Нет токена' });
 
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -175,7 +177,8 @@ app.get('/api/verify-token', async (req, res) => {
 // ============================================================
 app.get('/api/users', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         if (!token) return res.status(401).json({ error: 'Нет токена' });
 
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -206,7 +209,8 @@ app.get('/api/users/:id', async (req, res) => {
 
 app.put('/api/profile', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { bio } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -240,7 +244,8 @@ app.get('/api/posts', async (req, res) => {
 
 app.post('/api/posts', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { text } = req.body;
         if (!text) return res.status(400).json({ error: 'Текст обязателен' });
 
@@ -264,7 +269,8 @@ app.post('/api/posts', async (req, res) => {
 
 app.delete('/api/posts/:id', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const decoded = jwt.verify(token, JWT_SECRET);
 
         await pool.query(
@@ -282,7 +288,8 @@ app.delete('/api/posts/:id', async (req, res) => {
 // ============================================================
 app.get('/api/friends', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const decoded = jwt.verify(token, JWT_SECRET);
 
         const result = await pool.query(
@@ -305,7 +312,8 @@ app.get('/api/friends', async (req, res) => {
 
 app.get('/api/friends/requests', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const decoded = jwt.verify(token, JWT_SECRET);
 
         const result = await pool.query(
@@ -323,7 +331,8 @@ app.get('/api/friends/requests', async (req, res) => {
 
 app.post('/api/friends/request', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { targetId } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -339,7 +348,8 @@ app.post('/api/friends/request', async (req, res) => {
 
 app.post('/api/friends/accept', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { requestId } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -362,7 +372,8 @@ app.post('/api/friends/accept', async (req, res) => {
 
 app.post('/api/friends/reject', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' '')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { requestId } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -378,7 +389,8 @@ app.post('/api/friends/reject', async (req, res) => {
 
 app.post('/api/friends/remove', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { friendId } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
@@ -399,7 +411,8 @@ app.post('/api/friends/remove', async (req, res) => {
 // ============================================================
 app.get('/api/messages/:userId', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const decoded = jwt.verify(token, JWT_SECRET);
         const { userId } = req.params;
 
@@ -421,7 +434,8 @@ app.get('/api/messages/:userId', async (req, res) => {
 
 app.post('/api/messages/:userId', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { text } = req.body;
         const { userId } = req.params;
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -471,7 +485,8 @@ app.get('/api/groups', async (req, res) => {
 
 app.post('/api/groups', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        const token = authHeader ? authHeader.split(' ')[1] : null;
         const { name, description } = req.body;
         const decoded = jwt.verify(token, JWT_SECRET);
 
