@@ -1,7 +1,8 @@
 require('dotenv').config();
-const WebSocket = require('ws');
+const express = require('express');
 const http = require('http');
-const fs = require('fs');
+const WebSocket = require('ws');
+const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -14,674 +15,31 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'wond-super-secret-key-2026';
 const SALT_ROUNDS = 10;
 
-// Хранилища (в продакшене — база данных)
-const users = new Map(); // email -> { id, login, email, passwordHash, friends, createdAt }
-const sessions = new Map(); // token -> { userId, login, expires }
-const wsClients = new Map(); // userId -> ws
-// Подтверждение email
-app.post('/api/verify-email', async (req, res) => {
-    const { code } = req.body;
-    const userId = req.userId;
-    const user = users.get(userId);
-    
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-    
-    if (user.verificationCode === code) {
-        user.verified = true;
-        user.verificationCode = null;
-        users.set(userId, user);
-        res.json({ success: true });
-    } else {
-        res.status(400).json({ error: 'Неверный код' });
-    }
-});
-
-// Отправка кода повторно
-app.post('/api/resend-verification', async (req, res) => {
-    const userId = req.userId;
-    const user = users.get(userId);
-    
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-    
-    const code = generateVerificationCode();
-    user.verificationCode = code;
-    users.set(userId, user);
-    
-    // Отправка email (используй nodemailer)
-    // sendVerificationEmail(user.email, code);
-    
-    res.json({ success: true });
-});
-
-function generateVerificationCode() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
+// ============================================================
+//  EXPRESS APP
+// ============================================================
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname)));
 
 // ============================================================
-//  HTTP СЕРВЕР
+//  ХРАНИЛИЩА (в памяти — для демо, в продакшене — БД)
 // ============================================================
-const server = http.createServer((req, res) => {
-    // CORS для API
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method === 'OPTIONS') {
-        res.writeHead(200);
-        res.end();
-        return;
-    }
-
-    // API маршруты
-    if (req.url === '/api/register' && req.method === 'POST') {
-        handleRegister(req, res);
-        return;
-    }
-
-    if (req.url === '/api/login' && req.method === 'POST') {
-        handleLogin(req, res);
-        return;
-    }
-
-    if (req.url === '/api/verify' && req.method === 'GET') {
-        handleVerify(req, res);
-        return;
-    }
-
-    if (req.url === '/api/users' && req.method === 'GET') {
-        handleGetUsers(req, res);
-        return;
-    }
-
-    if (req.url === '/api/profile' && req.method === 'GET') {
-        handleGetProfile(req, res);
-        return;
-    }
-
-    if (req.url === '/api/profile' && req.method === 'POST') {
-        handleUpdateProfile(req, res);
-        return;
-    }
-
-    if (req.url === '/api/friends' && req.method === 'GET') {
-        handleGetFriends(req, res);
-        return;
-    }
-
-    if (req.url === '/api/friends/request' && req.method === 'POST') {
-        handleFriendRequest(req, res);
-        return;
-    }
-
-    if (req.url === '/api/friends/accept' && req.method === 'POST') {
-        handleAcceptFriend(req, res);
-        return;
-    }
-
-    if (req.url === '/api/friends/reject' && req.method === 'POST') {
-        handleRejectFriend(req, res);
-        return;
-    }
-
-    if (req.url === '/api/friends/remove' && req.method === 'POST') {
-        handleRemoveFriend(req, res);
-        return;
-    }
-
-    // Статика
-    if (req.url === '/' || req.url === '/index.html') {
-        fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
-            if (err) {
-                res.writeHead(500);
-                res.end('Ошибка загрузки');
-                return;
-            }
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(data);
-        });
-        return;
-    }
-
-    res.writeHead(404);
-    res.end('Not Found');
-});
-
-// ============================================================
-//  API ОБРАБОТЧИКИ
-// ============================================================
-
-// Регистрация
-async function handleRegister(req, res) {
-    try {
-        const body = await getRequestBody(req);
-        const { login, email, password } = JSON.parse(body);
-
-        // Валидация
-        if (!login || !email || !password) {
-            sendJson(res, 400, { error: 'Все поля обязательны' });
-            return;
-        }
-
-        if (password.length < 6) {
-            sendJson(res, 400, { error: 'Пароль должен быть минимум 6 символов' });
-            return;
-        }
-
-        if (!email.includes('@')) {
-            sendJson(res, 400, { error: 'Некорректный email' });
-            return;
-        }
-
-        // Проверка на существование
-        for (const [key, user] of users) {
-            if (user.login === login) {
-                sendJson(res, 400, { error: 'Логин уже занят' });
-                return;
-            }
-            if (user.email === email) {
-                sendJson(res, 400, { error: 'Email уже зарегистрирован' });
-                return;
-            }
-        }
-
-        // Хешируем пароль
-        const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-        const userId = uuidv4();
-
-        const newUser = {
-            id: userId,
-            login,
-            email,
-            passwordHash,
-            friends: [],
-            friendRequests: [],
-            bio: '🌟 Пользователь WOND',
-            createdAt: new Date().toISOString(),
-            online: false
-        };
-
-        users.set(userId, newUser);
-
-        // Генерируем JWT
-        const token = jwt.sign(
-            { userId, login, email },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        sendJson(res, 200, {
-            success: true,
-            token,
-            user: {
-                id: userId,
-                login,
-                email,
-                bio: newUser.bio,
-                friends: []
-            }
-        });
-
-        console.log(`✅ Зарегистрирован: ${login} (${email})`);
-
-    } catch (err) {
-        console.error('Register error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-// Вход
-async function handleLogin(req, res) {
-    try {
-        const body = await getRequestBody(req);
-        const { login, password } = JSON.parse(body);
-
-        if (!login || !password) {
-            sendJson(res, 400, { error: 'Все поля обязательны' });
-            return;
-        }
-
-        // Ищем пользователя
-        let foundUser = null;
-        for (const [key, user] of users) {
-            if (user.login === login || user.email === login) {
-                foundUser = user;
-                break;
-            }
-        }
-
-        if (!foundUser) {
-            sendJson(res, 401, { error: 'Неверный логин или пароль' });
-            return;
-        }
-
-        // Проверяем пароль
-        const isValid = await bcrypt.compare(password, foundUser.passwordHash);
-        if (!isValid) {
-            sendJson(res, 401, { error: 'Неверный логин или пароль' });
-            return;
-        }
-
-        // Генерируем JWT
-        const token = jwt.sign(
-            { userId: foundUser.id, login: foundUser.login, email: foundUser.email },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        sendJson(res, 200, {
-            success: true,
-            token,
-            user: {
-                id: foundUser.id,
-                login: foundUser.login,
-                email: foundUser.email,
-                bio: foundUser.bio,
-                friends: foundUser.friends || []
-            }
-        });
-
-        console.log(`✅ Вход: ${foundUser.login}`);
-
-    } catch (err) {
-        console.error('Login error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-// Проверка токена
-function handleVerify(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Токен не предоставлен' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 401, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        sendJson(res, 200, {
-            valid: true,
-            user: {
-                id: user.id,
-                login: user.login,
-                email: user.email,
-                bio: user.bio,
-                friends: user.friends || []
-            }
-        });
-    } catch (err) {
-        sendJson(res, 401, { error: 'Недействительный токен' });
-    }
-}
-
-// Получить всех пользователей
-function handleGetUsers(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const userList = Array.from(users.values()).map(u => ({
-            id: u.id,
-            login: u.login,
-            email: u.email,
-            bio: u.bio,
-            online: wsClients.has(u.id),
-            friends: u.friends || []
-        }));
-
-        sendJson(res, 200, { users: userList });
-    } catch (err) {
-        sendJson(res, 401, { error: 'Недействительный токен' });
-    }
-}
-
-// Получить профиль
-function handleGetProfile(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        sendJson(res, 200, {
-            id: user.id,
-            login: user.login,
-            email: user.email,
-            bio: user.bio,
-            friends: user.friends || [],
-            createdAt: user.createdAt
-        });
-    } catch (err) {
-        sendJson(res, 401, { error: 'Недействительный токен' });
-    }
-}
-
-// Обновить профиль
-async function handleUpdateProfile(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const body = await getRequestBody(req);
-        const { bio } = JSON.parse(body);
-
-        if (bio !== undefined) {
-            user.bio = bio;
-        }
-
-        users.set(user.id, user);
-
-        sendJson(res, 200, {
-            success: true,
-            user: {
-                id: user.id,
-                login: user.login,
-                email: user.email,
-                bio: user.bio,
-                friends: user.friends || []
-            }
-        });
-    } catch (err) {
-        console.error('Update profile error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-// Друзья
-function handleGetFriends(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const friendsList = (user.friends || []).map(friendId => {
-            const friend = users.get(friendId);
-            return friend ? {
-                id: friend.id,
-                login: friend.login,
-                email: friend.email,
-                bio: friend.bio,
-                online: wsClients.has(friend.id)
-            } : null;
-        }).filter(Boolean);
-
-        const requests = (user.friendRequests || [])
-            .filter(r => r.status === 'pending')
-            .map(r => {
-                const fromUser = users.get(r.from);
-                return fromUser ? {
-                    id: r.id,
-                    from: fromUser.id,
-                    fromLogin: fromUser.login,
-                    status: r.status,
-                    createdAt: r.createdAt
-                } : null;
-            }).filter(Boolean);
-
-        sendJson(res, 200, { friends: friendsList, requests });
-    } catch (err) {
-        sendJson(res, 401, { error: 'Недействительный токен' });
-    }
-}
-
-async function handleFriendRequest(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const body = await getRequestBody(req);
-        const { targetId } = JSON.parse(body);
-
-        const target = users.get(targetId);
-        if (!target) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        if (user.id === targetId) {
-            sendJson(res, 400, { error: 'Нельзя добавить себя' });
-            return;
-        }
-
-        // Проверяем, уже друзья
-        if ((user.friends || []).includes(targetId)) {
-            sendJson(res, 400, { error: 'Уже в друзьях' });
-            return;
-        }
-
-        // Проверяем, есть ли уже заявка
-        const existing = (target.friendRequests || []).find(r => r.from === user.id && r.status === 'pending');
-        if (existing) {
-            sendJson(res, 400, { error: 'Заявка уже отправлена' });
-            return;
-        }
-
-        const requestId = uuidv4();
-        if (!target.friendRequests) target.friendRequests = [];
-        target.friendRequests.push({
-            id: requestId,
-            from: user.id,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        });
-
-        users.set(target.id, target);
-
-        // Отправляем уведомление через WebSocket
-        const targetWs = wsClients.get(targetId);
-        if (targetWs) {
-            targetWs.send(JSON.stringify({
-                type: 'friend_request',
-                from: user.id,
-                fromLogin: user.login,
-                requestId: requestId
-            }));
-        }
-
-        sendJson(res, 200, { success: true, requestId });
-        console.log(`📨 ${user.login} отправил заявку ${target.login}`);
-
-    } catch (err) {
-        console.error('Friend request error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-async function handleAcceptFriend(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const body = await getRequestBody(req);
-        const { requestId } = JSON.parse(body);
-
-        const request = (user.friendRequests || []).find(r => r.id === requestId);
-        if (!request) {
-            sendJson(res, 404, { error: 'Заявка не найдена' });
-            return;
-        }
-
-        request.status = 'accepted';
-
-        // Добавляем в друзья
-        if (!user.friends) user.friends = [];
-        if (!user.friends.includes(request.from)) {
-            user.friends.push(request.from);
-        }
-
-        const friend = users.get(request.from);
-        if (friend) {
-            if (!friend.friends) friend.friends = [];
-            if (!friend.friends.includes(user.id)) {
-                friend.friends.push(user.id);
-            }
-            users.set(friend.id, friend);
-
-            // Уведомляем друга
-            const friendWs = wsClients.get(friend.id);
-            if (friendWs) {
-                friendWs.send(JSON.stringify({
-                    type: 'friend_accepted',
-                    from: user.id,
-                    fromLogin: user.login
-                }));
-            }
-        }
-
-        users.set(user.id, user);
-
-        sendJson(res, 200, { success: true });
-        console.log(`✅ ${user.login} принял заявку от ${request.from}`);
-
-    } catch (err) {
-        console.error('Accept friend error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-async function handleRejectFriend(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const body = await getRequestBody(req);
-        const { requestId } = JSON.parse(body);
-
-        user.friendRequests = (user.friendRequests || []).filter(r => r.id !== requestId);
-        users.set(user.id, user);
-
-        sendJson(res, 200, { success: true });
-    } catch (err) {
-        console.error('Reject friend error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
-
-async function handleRemoveFriend(req, res) {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-        sendJson(res, 401, { error: 'Не авторизован' });
-        return;
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users.get(decoded.userId);
-
-        if (!user) {
-            sendJson(res, 404, { error: 'Пользователь не найден' });
-            return;
-        }
-
-        const body = await getRequestBody(req);
-        const { friendId } = JSON.parse(body);
-
-        user.friends = (user.friends || []).filter(id => id !== friendId);
-        users.set(user.id, user);
-
-        // Удаляем и у друга
-        const friend = users.get(friendId);
-        if (friend) {
-            friend.friends = (friend.friends || []).filter(id => id !== user.id);
-            users.set(friend.id, friend);
-        }
-
-        sendJson(res, 200, { success: true });
-    } catch (err) {
-        console.error('Remove friend error:', err);
-        sendJson(res, 500, { error: 'Ошибка сервера' });
-    }
-}
+const users = new Map();
+const posts = [];
+const messages = new Map();
+const groups = [];
+const wsClients = new Map();
+let postIdCounter = 1;
+let messageIdCounter = 1;
+let groupIdCounter = 1;
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================
-
-function getRequestBody(req) {
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => resolve(body));
-        req.on('error', reject);
-    });
-}
-
-function sendJson(res, status, data) {
-    res.writeHead(status, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(data));
+function generateVerificationCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 function getTokenFromHeader(req) {
@@ -692,12 +50,616 @@ function getTokenFromHeader(req) {
     return null;
 }
 
+function verifyToken(req, res, next) {
+    const token = getTokenFromHeader(req);
+    if (!token) {
+        return res.status(401).json({ error: 'Токен не предоставлен' });
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.userId = decoded.userId;
+        req.userLogin = decoded.login;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Недействительный токен' });
+    }
+}
+
 // ============================================================
-//  WEBSOCKET СЕРВЕР
+//  API РОУТЫ
 // ============================================================
+
+// Регистрация
+app.post('/api/register', async (req, res) => {
+    try {
+        const { login, email, password } = req.body;
+
+        if (!login || !email || !password) {
+            return res.status(400).json({ error: 'Все поля обязательны' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Пароль минимум 6 символов' });
+        }
+        if (!email.includes('@')) {
+            return res.status(400).json({ error: 'Некорректный email' });
+        }
+
+        for (const [key, user] of users) {
+            if (user.login === login) {
+                return res.status(400).json({ error: 'Логин уже занят' });
+            }
+            if (user.email === email) {
+                return res.status(400).json({ error: 'Email уже зарегистрирован' });
+            }
+        }
+
+        const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+        const userId = uuidv4();
+        const verificationCode = generateVerificationCode();
+
+        const newUser = {
+            id: userId,
+            login,
+            email,
+            passwordHash,
+            friends: [],
+            friendRequests: [],
+            bio: '🌟 Пользователь WOND',
+            verified: false,
+            verificationCode,
+            createdAt: new Date().toISOString()
+        };
+
+        users.set(userId, newUser);
+
+        // В реальном проекте — отправка email через nodemailer
+        console.log(`📧 Код подтверждения для ${email}: ${verificationCode}`);
+
+        const token = jwt.sign(
+            { userId, login, email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: userId,
+                login,
+                email,
+                bio: newUser.bio,
+                verified: false
+            }
+        });
+
+        console.log(`✅ Зарегистрирован: ${login} (${email})`);
+
+    } catch (err) {
+        console.error('Register error:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Вход
+app.post('/api/login', async (req, res) => {
+    try {
+        const { login, password } = req.body;
+
+        if (!login || !password) {
+            return res.status(400).json({ error: 'Все поля обязательны' });
+        }
+
+        let foundUser = null;
+        for (const [key, user] of users) {
+            if (user.login === login || user.email === login) {
+                foundUser = user;
+                break;
+            }
+        }
+
+        if (!foundUser) {
+            return res.status(401).json({ error: 'Неверный логин или пароль' });
+        }
+
+        const isValid = await bcrypt.compare(password, foundUser.passwordHash);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Неверный логин или пароль' });
+        }
+
+        const token = jwt.sign(
+            { userId: foundUser.id, login: foundUser.login, email: foundUser.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: foundUser.id,
+                login: foundUser.login,
+                email: foundUser.email,
+                bio: foundUser.bio,
+                verified: foundUser.verified || false
+            }
+        });
+
+        console.log(`✅ Вход: ${foundUser.login}`);
+
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Проверка токена
+app.get('/api/verify', verifyToken, (req, res) => {
+    const user = users.get(req.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json({
+        valid: true,
+        user: {
+            id: user.id,
+            login: user.login,
+            email: user.email,
+            bio: user.bio,
+            verified: user.verified || false
+        }
+    });
+});
+
+// Подтверждение email
+app.post('/api/verify-email', verifyToken, async (req, res) => {
+    try {
+        const { code } = req.body;
+        const user = users.get(req.userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Пользователь не найден' });
+        }
+
+        if (user.verified) {
+            return res.json({ success: true, message: 'Email уже подтверждён' });
+        }
+
+        if (user.verificationCode === code) {
+            user.verified = true;
+            user.verificationCode = null;
+            users.set(req.userId, user);
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ error: 'Неверный код подтверждения' });
+        }
+    } catch (err) {
+        console.error('Verify error:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Повторная отправка кода
+app.post('/api/resend-verification', verifyToken, async (req, res) => {
+    try {
+        const user = users.get(req.userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Пользователь не найден' });
+        }
+
+        if (user.verified) {
+            return res.json({ success: true, message: 'Email уже подтверждён' });
+        }
+
+        const code = generateVerificationCode();
+        user.verificationCode = code;
+        users.set(req.userId, user);
+
+        console.log(`📧 Новый код для ${user.email}: ${code}`);
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Resend error:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Получить всех пользователей
+app.get('/api/users', verifyToken, (req, res) => {
+    const userList = Array.from(users.values()).map(u => ({
+        id: u.id,
+        login: u.login,
+        email: u.email,
+        bio: u.bio,
+        online: wsClients.has(u.id),
+        friends: u.friends || [],
+        verified: u.verified || false
+    }));
+    res.json({ users: userList });
+});
+
+// Получить профиль
+app.get('/api/profile', verifyToken, (req, res) => {
+    const user = users.get(req.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json({
+        id: user.id,
+        login: user.login,
+        email: user.email,
+        bio: user.bio,
+        friends: user.friends || [],
+        verified: user.verified || false,
+        createdAt: user.createdAt
+    });
+});
+
+// Получить пользователя по ID
+app.get('/api/users/:id', verifyToken, (req, res) => {
+    const user = users.get(req.params.id);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json({
+        user: {
+            id: user.id,
+            login: user.login,
+            email: user.email,
+            bio: user.bio,
+            verified: user.verified || false,
+            online: wsClients.has(user.id)
+        }
+    });
+});
+
+// ============================================================
+//  ПОСТЫ
+// ============================================================
+app.get('/api/posts', verifyToken, (req, res) => {
+    res.json({ posts: posts.slice().reverse() });
+});
+
+app.post('/api/posts', verifyToken, async (req, res) => {
+    const { text } = req.body;
+    if (!text) {
+        return res.status(400).json({ error: 'Текст поста обязателен' });
+    }
+
+    const user = users.get(req.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    const post = {
+        id: postIdCounter++,
+        authorId: req.userId,
+        author: user.login,
+        text: text,
+        time: new Date().toLocaleString()
+    };
+
+    posts.push(post);
+    res.json({ success: true, post });
+});
+
+app.delete('/api/posts/:id', verifyToken, (req, res) => {
+    const postId = parseInt(req.params.id);
+    const index = posts.findIndex(p => p.id === postId);
+    if (index === -1) {
+        return res.status(404).json({ error: 'Пост не найден' });
+    }
+    if (posts[index].authorId !== req.userId) {
+        return res.status(403).json({ error: 'Нет прав' });
+    }
+    posts.splice(index, 1);
+    res.json({ success: true });
+});
+
+// ============================================================
+//  ДРУЗЬЯ
+// ============================================================
+app.get('/api/friends', verifyToken, (req, res) => {
+    const user = users.get(req.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    const friendsList = (user.friends || []).map(friendId => {
+        const friend = users.get(friendId);
+        return friend ? {
+            id: friend.id,
+            login: friend.login,
+            email: friend.email,
+            bio: friend.bio,
+            online: wsClients.has(friend.id)
+        } : null;
+    }).filter(Boolean);
+
+    res.json({ friends: friendsList });
+});
+
+app.get('/api/friends/requests', verifyToken, (req, res) => {
+    const user = users.get(req.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    const requests = (user.friendRequests || [])
+        .filter(r => r.status === 'pending')
+        .map(r => {
+            const fromUser = users.get(r.from);
+            return fromUser ? {
+                id: r.id,
+                from: fromUser.id,
+                fromLogin: fromUser.login,
+                status: r.status,
+                createdAt: r.createdAt
+            } : null;
+        }).filter(Boolean);
+
+    res.json({ requests });
+});
+
+app.post('/api/friends/request', verifyToken, async (req, res) => {
+    const { targetId } = req.body;
+    const user = users.get(req.userId);
+    const target = users.get(targetId);
+
+    if (!user || !target) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    if (user.id === targetId) {
+        return res.status(400).json({ error: 'Нельзя добавить себя' });
+    }
+
+    if ((user.friends || []).includes(targetId)) {
+        return res.status(400).json({ error: 'Уже в друзьях' });
+    }
+
+    const existing = (target.friendRequests || []).find(r => r.from === user.id && r.status === 'pending');
+    if (existing) {
+        return res.status(400).json({ error: 'Заявка уже отправлена' });
+    }
+
+    const requestId = uuidv4();
+    if (!target.friendRequests) target.friendRequests = [];
+    target.friendRequests.push({
+        id: requestId,
+        from: user.id,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+    });
+
+    users.set(target.id, target);
+
+    // Уведомление через WebSocket
+    const targetWs = wsClients.get(targetId);
+    if (targetWs) {
+        targetWs.send(JSON.stringify({
+            type: 'friend_request',
+            from: user.id,
+            fromLogin: user.login,
+            requestId: requestId
+        }));
+    }
+
+    res.json({ success: true, requestId });
+});
+
+app.post('/api/friends/accept', verifyToken, async (req, res) => {
+    const { requestId } = req.body;
+    const user = users.get(req.userId);
+
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    const request = (user.friendRequests || []).find(r => r.id === requestId);
+    if (!request) {
+        return res.status(404).json({ error: 'Заявка не найдена' });
+    }
+
+    request.status = 'accepted';
+
+    if (!user.friends) user.friends = [];
+    if (!user.friends.includes(request.from)) {
+        user.friends.push(request.from);
+    }
+
+    const friend = users.get(request.from);
+    if (friend) {
+        if (!friend.friends) friend.friends = [];
+        if (!friend.friends.includes(user.id)) {
+            friend.friends.push(user.id);
+        }
+        users.set(friend.id, friend);
+
+        const friendWs = wsClients.get(friend.id);
+        if (friendWs) {
+            friendWs.send(JSON.stringify({
+                type: 'friend_accepted',
+                from: user.id,
+                fromLogin: user.login
+            }));
+        }
+    }
+
+    users.set(user.id, user);
+    res.json({ success: true });
+});
+
+app.post('/api/friends/reject', verifyToken, async (req, res) => {
+    const { requestId } = req.body;
+    const user = users.get(req.userId);
+
+    if (!user) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    user.friendRequests = (user.friendRequests || []).filter(r => r.id !== requestId);
+    users.set(user.id, user);
+    res.json({ success: true });
+});
+
+app.post('/api/friends/remove', verifyToken, async (req, res) => {
+    const { friendId } = req.body;
+    const user = users.get(req.userId);
+    const friend = users.get(friendId);
+
+    if (!user || !friend) {
+        return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+
+    user.friends = (user.friends || []).filter(id => id !== friendId);
+    friend.friends = (friend.friends || []).filter(id => id !== user.id);
+
+    users.set(user.id, user);
+    users.set(friend.id, friend);
+
+    res.json({ success: true });
+});
+
+// ============================================================
+//  СООБЩЕНИЯ
+// ============================================================
+app.get('/api/messages/:userId', verifyToken, (req, res) => {
+    const chatKey = [req.userId, req.params.userId].sort().join('_');
+    const msgs = messages.get(chatKey) || [];
+    res.json({ messages: msgs });
+});
+
+app.post('/api/messages/:userId', verifyToken, async (req, res) => {
+    const { text } = req.body;
+    if (!text) {
+        return res.status(400).json({ error: 'Текст сообщения обязателен' });
+    }
+
+    const targetId = req.params.userId;
+    const chatKey = [req.userId, targetId].sort().join('_');
+
+    if (!messages.has(chatKey)) {
+        messages.set(chatKey, []);
+    }
+
+    const msg = {
+        id: messageIdCounter++,
+        from: req.userId,
+        to: targetId,
+        text: text,
+        time: new Date().toLocaleString(),
+        read: false
+    };
+
+    messages.get(chatKey).push(msg);
+
+    // Уведомление через WebSocket
+    const targetWs = wsClients.get(targetId);
+    if (targetWs) {
+        const user = users.get(req.userId);
+        targetWs.send(JSON.stringify({
+            type: 'new_message',
+            from: req.userId,
+            fromLogin: user ? user.login : 'Unknown',
+            message: msg
+        }));
+    }
+
+    res.json({ success: true, message: msg });
+});
+
+// ============================================================
+//  ГРУППЫ
+// ============================================================
+app.get('/api/groups', verifyToken, (req, res) => {
+    res.json({ groups });
+});
+
+app.post('/api/groups', verifyToken, async (req, res) => {
+    const { name, description } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Название группы обязательно' });
+    }
+
+    const existing = groups.find(g => g.name === name);
+    if (existing) {
+        return res.status(400).json({ error: 'Группа с таким названием уже существует' });
+    }
+
+    const group = {
+        id: groupIdCounter++,
+        name,
+        description: description || 'Новая группа',
+        creator: req.userId,
+        members: [req.userId],
+        created: new Date().toLocaleString()
+    };
+
+    groups.push(group);
+    res.json({ success: true, group });
+});
+
+app.post('/api/groups/:id/join', verifyToken, (req, res) => {
+    const groupId = parseInt(req.params.id);
+    const group = groups.find(g => g.id === groupId);
+    if (!group) {
+        return res.status(404).json({ error: 'Группа не найдена' });
+    }
+
+    if (group.members.includes(req.userId)) {
+        return res.json({ success: true, message: 'Уже в группе' });
+    }
+
+    if (group.members.length >= 100) {
+        return res.status(400).json({ error: 'Группа заполнена' });
+    }
+
+    group.members.push(req.userId);
+    res.json({ success: true });
+});
+
+app.post('/api/groups/:id/leave', verifyToken, (req, res) => {
+    const groupId = parseInt(req.params.id);
+    const group = groups.find(g => g.id === groupId);
+    if (!group) {
+        return res.status(404).json({ error: 'Группа не найдена' });
+    }
+
+    group.members = group.members.filter(id => id !== req.userId);
+    res.json({ success: true });
+});
+
+app.delete('/api/groups/:id', verifyToken, (req, res) => {
+    const groupId = parseInt(req.params.id);
+    const index = groups.findIndex(g => g.id === groupId);
+    if (index === -1) {
+        return res.status(404).json({ error: 'Группа не найдена' });
+    }
+
+    if (groups[index].creator !== req.userId) {
+        return res.status(403).json({ error: 'Только создатель может удалить группу' });
+    }
+
+    groups.splice(index, 1);
+    res.json({ success: true });
+});
+
+// ============================================================
+//  ROOT
+// ============================================================
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ============================================================
+//  HTTP + WEBSOCKET СЕРВЕР
+// ============================================================
+const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-wss.on('connection', (ws, req) => {
+wss.on('connection', (ws) => {
     let userId = null;
     let userLogin = null;
 
@@ -705,14 +667,12 @@ wss.on('connection', (ws, req) => {
         try {
             const data = JSON.parse(message);
 
-            // Первое сообщение должно содержать токен
             if (data.type === 'auth') {
                 try {
                     const decoded = jwt.verify(data.token, JWT_SECRET);
                     userId = decoded.userId;
                     userLogin = decoded.login;
 
-                    // Проверяем, есть ли пользователь
                     const user = users.get(userId);
                     if (!user) {
                         ws.send(JSON.stringify({ type: 'error', message: 'Пользователь не найден' }));
@@ -723,14 +683,12 @@ wss.on('connection', (ws, req) => {
                     wsClients.set(userId, ws);
                     console.log(`🔌 ${userLogin} подключился к WebSocket`);
 
-                    // Отправляем подтверждение
                     ws.send(JSON.stringify({
                         type: 'auth_success',
                         userId,
                         login: userLogin
                     }));
 
-                    // Уведомляем всех об онлайне
                     broadcast({
                         type: 'user_online',
                         userId,
@@ -745,13 +703,11 @@ wss.on('connection', (ws, req) => {
                 }
             }
 
-            // Если не авторизован — игнорируем
             if (!userId) {
                 ws.send(JSON.stringify({ type: 'error', message: 'Не авторизован' }));
                 return;
             }
 
-            // Обработка звонков
             switch (data.type) {
                 case 'call_offer':
                     const targetOffer = wsClients.get(data.targetId);
@@ -834,8 +790,6 @@ wss.on('connection', (ws, req) => {
         if (userId) {
             wsClients.delete(userId);
             console.log(`🔌 ${userLogin} отключился`);
-
-            // Уведомляем всех об офлайне
             broadcast({
                 type: 'user_offline',
                 userId,
@@ -849,9 +803,6 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-// ============================================================
-//  BROADCAST
-// ============================================================
 function broadcast(data) {
     const message = JSON.stringify(data);
     for (const [id, client] of wsClients) {
@@ -862,18 +813,18 @@ function broadcast(data) {
 }
 
 // ============================================================
-//  ЗАПУСК СЕРВЕРА
+//  ЗАПУСК
 // ============================================================
 server.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════════════════╗
-║        🚀 WOND — БЕЗОПАСНЫЙ СЕРВЕР               ║
+║        🚀 WOND — ПОЛНЫЙ СЕРВЕР                   ║
 ║                                                    ║
 ║   📡 WebSocket: ws://localhost:${PORT}              ║
-║   🌐 API:       http://localhost:${PORT}/api        ║
+║   🌐 HTTP:      http://localhost:${PORT}            ║
 ║                                                    ║
 ║   🔒 JWT + bcrypt шифрование                      ║
-║   📧 Регистрация по email                         ║
+║   📧 Подтверждение email (код на почту)           ║
 ║   👨‍💼 CEO: LEV USKOV                             ║
 ║                                                    ║
 ║   ✅ Сервер запущен!                               ║
@@ -881,7 +832,7 @@ server.listen(PORT, () => {
     `);
 });
 
-// Добавляем тестового пользователя для удобства
+// Добавляем тестового пользователя
 (async () => {
     const testPassword = await bcrypt.hash('123456', SALT_ROUNDS);
     const testUser = {
@@ -892,8 +843,10 @@ server.listen(PORT, () => {
         friends: [],
         friendRequests: [],
         bio: '🧪 Тестовый аккаунт',
+        verified: true,
+        verificationCode: null,
         createdAt: new Date().toISOString()
     };
     users.set('test-user-1', testUser);
-    console.log('🧪 Тестовый пользователь: test / 123456');
+    console.log('🧪 Тестовый пользователь: test / 123456 (Email подтверждён)');
 })();
