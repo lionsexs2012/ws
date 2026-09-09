@@ -425,6 +425,38 @@
             .profile-card .profile-header { flex-direction: column; text-align: center; }
             .profile-card .profile-stats { justify-content: center; }
         }
+
+        /* WOND 2.0 visual system */
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap');
+        :root { --ink:#101827; --muted:#788197; --line:#e8eaf1; --violet:#6957ff; --blue:#1c89ff; --paper:#ffffff; --canvas:#f5f6fb; --lime:#b8f65c; }
+        * { font-family: Manrope, 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--canvas); color:var(--ink); }
+        #app { max-width: 1440px; background:var(--canvas); }
+        .sidebar { width:280px; padding:28px 16px 18px; background:rgba(255,255,255,.92); border-right:1px solid var(--line); }
+        .sidebar .logo { border:0; padding:0 12px 32px; gap:10px; }
+        .sidebar .logo .icon { width:38px; height:38px; border-radius:13px; background:linear-gradient(135deg,#705cff,#267cff); font-size:20px; box-shadow:0 8px 18px rgba(86,81,255,.28); }
+        .sidebar .logo h1 { font-family:Unbounded, sans-serif; font-size:22px; letter-spacing:-1.5px; color:var(--ink); background:none; -webkit-text-fill-color:initial; }
+        .sidebar .user-card { padding:12px; margin:0 0 24px; border:1px solid var(--line); background:#fbfbfe; border-radius:18px; gap:11px; }
+        .sidebar .user-card .avatar { width:42px; height:42px; font-size:17px; }
+        .sidebar .user-card .info .name { font-size:13px; }.sidebar .user-card .info .status { color:#22a36b; font-size:11px; }
+        .sidebar .nav { padding:0; }.sidebar .nav button { padding:12px 14px; font-size:13px; font-weight:700; gap:12px; color:#697287; border-radius:13px; margin:3px 0; }
+        .sidebar .nav button:hover { background:#f2f3fa; }.sidebar .nav button.active { background:#191d2b; color:white; box-shadow:none; }
+        .sidebar .nav .emoji { font-size:17px; width:20px; text-align:center; filter:grayscale(1); }.sidebar .nav button.active .emoji { filter:none; }
+        .sidebar .logout-btn { margin:14px 4px 0; border:0; background:#f7f7fb; color:#70788b; font-size:12px; padding:12px; border-radius:13px; }
+        .main { position:relative; padding:28px 34px 44px; background:var(--canvas); }
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin:0 0 28px; }.topbar h2 { font-family:Unbounded,sans-serif; letter-spacing:-1.4px; font-size:22px; }.topbar p { color:var(--muted); font-size:12px; margin-top:5px; font-weight:600; }.topbar-actions { display:flex; gap:10px; align-items:center; }.topbar-actions button { border:1px solid var(--line); background:white; color:#30384b; width:38px; height:38px; border-radius:13px; cursor:pointer; font-size:16px; }.topbar-actions .new { width:auto; padding:0 15px; background:var(--violet); color:white; border-color:var(--violet); font-weight:800; font-size:12px; }
+        .post-form,.post,.profile-card,.friend-card,.group-card,.create-group-form,.user-list,.chat-area { border:1px solid var(--line); box-shadow:none; border-radius:20px; }
+        .post-form { padding:18px; margin-bottom:16px; }.post-form textarea { border:0; background:#f7f7fb; border-radius:14px; padding:14px 16px; min-height:78px; color:var(--ink); }.post-form textarea:focus { border:0; box-shadow:0 0 0 2px #dcd8ff; }.post-form .actions { justify-content:space-between; align-items:center; }.post-form .actions:before { content:'Добавьте мысль, фото или вопрос'; color:#9299aa; font-size:11px; font-weight:700; }.post-form .actions button,.chat-input button,.create-group-form button { background:var(--violet); border-radius:12px; padding:10px 16px; font-size:12px; }
+        .post { padding:20px; margin-bottom:14px; background:white; }.post .header .author { font-size:13px; }.post .header .time { display:block; margin:2px 0 0; font-size:10px; }.post .text { font-size:14px; line-height:1.75; color:#374154; }.post .header .avatar { box-shadow:0 0 0 3px #f0efff; }
+        .messenger-layout { height:calc(100vh - 156px); min-height:520px; gap:14px; }.user-list { width:250px; padding:10px; }.user-list:before { content:'Диалоги'; display:block; color:#252c3b; padding:9px 10px 13px; font-size:12px; font-weight:800; }.user-list .item { padding:10px; border-radius:13px; }.user-list .item.active { background:#f0eeff; color:var(--ink); }.chat-area { border-radius:20px; }.chat-messages { padding:22px; background:linear-gradient(180deg,#fff 0%,#fafaff 100%); }.chat-messages .msg { font-size:13px; padding:11px 14px; border-radius:16px; }.chat-messages .msg.out { background:var(--violet); }.chat-messages .msg.in { background:#f0f1f6; }.chat-input { padding:13px; }.chat-input input { border:0; background:#f4f5f9; font-size:13px; }.chat-input input:focus { border:0; box-shadow:0 0 0 2px #ddd9ff; }.chat-input button { padding:10px 16px; }
+        .profile-card { padding:28px; }.friends-grid,.groups-grid { gap:14px; }.friend-card,.group-card { border-radius:18px; padding:18px; }.friend-card:hover,.group-card:hover { border-color:#cfcaff; transform:translateY(-2px); box-shadow:0 10px 25px rgba(25,29,43,.06); }.create-group-form { padding:14px; }.create-group-form input { border:0; background:#f5f6fa; border-radius:12px; }
+        .footer { border:0; color:#a2a8b6; font-size:11px; }.footer .stats { background:#191d2b; font-size:10px; }
+        #authPanel { position:relative; overflow:hidden; background:#171928; }.auth-box { position:relative; max-width:460px; padding:40px; border-radius:26px; box-shadow:0 30px 80px rgba(0,0,0,.3); z-index:1; }.auth-box:after { content:''; position:absolute; width:210px; height:210px; right:-110px; top:-110px; border-radius:50%; background:var(--lime); opacity:.85; filter:blur(4px); z-index:-1; }.auth-box .logo-big .icon { width:60px; height:60px; border-radius:19px; background:#191d2b; font-family:Unbounded,sans-serif; font-size:25px; }.auth-box .logo-big h1 { font-family:Unbounded,sans-serif; color:var(--ink); background:none; -webkit-text-fill-color:initial; font-size:31px; letter-spacing:-2px; }.auth-box .logo-big p { color:#7c8495; font-size:12px; font-weight:600; }.auth-box .auth-tabs { background:#f3f4f8; }.auth-box .auth-tabs button { font-size:12px; }.auth-box .auth-tabs button.active { color:#4f42dd; }.auth-box input { border:1px solid #e2e4eb; font-size:13px; padding:13px 15px; }.auth-box input:focus { border-color:var(--violet); }.auth-box .btn-primary { background:var(--violet); border-radius:13px; font-size:13px; }.auth-box .btn-primary:hover { box-shadow:0 8px 24px rgba(105,87,255,.32); }.auth-hint { text-align:center; color:#8e95a5; font-size:11px; margin-top:18px; font-weight:600; }.auth-orbit { position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.12); }.orbit-one { height:660px; width:660px; left:-270px; bottom:-310px; }.orbit-two { height:440px; width:440px; right:-160px; top:-190px; }.auth-ambient { position:absolute; right:12%; bottom:12%; color:white; max-width:260px; }.auth-ambient b { display:block; font-family:Unbounded,sans-serif; font-size:25px; line-height:1.25; letter-spacing:-1.6px; }.auth-ambient span { display:block; color:#a5a8bc; font-size:12px; margin-top:12px; line-height:1.6; }
+        .connection-status { background:#191d2b!important; bottom:16px; right:16px; border-radius:10px; font-size:10px; box-shadow:0 8px 22px rgba(0,0,0,.15); }.connection-status.online { background:#1d9868!important; }
+        .call-overlay { background:rgba(17,20,33,.9); }.call-overlay .call-container,.modal-box { border-radius:24px; }.call-overlay .call-actions .call-end { background:#ff5d66; }.call-overlay .call-actions .call-accept { background:#1dba7c; }
+        @media (max-width:900px) { .auth-ambient{display:none;} .main{padding:22px;} }
+        @media (max-width:768px) { .sidebar { width:74px; padding:20px 10px; }.sidebar .logo { padding:0 7px 22px; }.sidebar .logo .icon{display:flex;} .sidebar .user-card{padding:7px;justify-content:center;}.topbar h2{font-size:16px;}.topbar p{display:none;}.topbar-actions .new{display:none;}.main{padding:18px 14px 30px;}.messenger-layout{min-height:600px;}.user-list{width:100%;} }
+
     </style>
 </head>
 <body>
@@ -455,6 +487,10 @@
     
     <!-- MAIN -->
     <div class="main" id="mainContent" style="display:none;">
+        <header class="topbar">
+            <div><h2>Ваша лента</h2><p>Всё важное от людей и сообществ, которые вам близки.</p></div>
+            <div class="topbar-actions"><button aria-label="Поиск">⌕</button><button aria-label="Уведомления">◌</button><button class="new" onclick="document.getElementById('postInput').focus()">+ Создать</button></div>
+        </header>
         <!-- Wall -->
         <div id="wallPanel">
             <div class="post-form">
@@ -512,6 +548,8 @@
     
     <!-- AUTH -->
     <div id="authPanel">
+        <div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div>
+        <div class="auth-ambient"><b>Место для своих.</b><span>Общайтесь, делитесь идеями и созванивайтесь без границ.</span></div>
         <div class="auth-box">
             <div class="logo-big">
                 <div class="icon">W</div>
@@ -536,6 +574,7 @@
                 <button class="btn-primary" id="registerBtn">Создать аккаунт</button>
                 <div class="msg" id="registerMessage"></div>
             </div>
+            <div class="auth-hint">Безопасное пространство для настоящего общения</div>
         </div>
     </div>
     
